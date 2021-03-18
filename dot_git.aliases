@@ -1,0 +1,19 @@
+
+[alias]
+  s = status -s
+  b = branch -vva
+  co = checkout
+
+  sm = submodule
+
+  ls = ls-files
+  lsm = ls-files -m
+  un = ls-files -o --exclude-standard
+  lsc = diff --cached --name-only --diff-filter=ARMTC --relative
+  lsu = diff --name-only --diff-filter=U --relative
+  lsf = "!f() { git diff-tree --no-commit-id --name-only -r ${1:-HEAD}; }; f"
+
+  d = "!git diff-index --quiet HEAD -- ; git diff --patch-with-stat"
+  dc = diff --cached --minimal --word-diff -w
+  dw = "!git diff-index --quiet HEAD -- ; git diff --word-diff=color --patch-with-stat"
+
