@@ -14,5 +14,8 @@ alias latr='ls -latr'
 # MISC Aliases
 
 alias tmux='tmux -2u'
+# shellcheck disable=SC2154
 alias where='for ix in ${!DIRSTACK[@]}; do echo ${DIRSTACK[$ix]}; done'
 alias dps="docker ps --format '{{ printf \"%-30s %-20s %s\" .Names .Status .Ports }}'"
+alias tf='terraform'
+alias k='kubectl'

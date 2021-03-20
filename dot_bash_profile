@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 
 if [ -f "${HOME}/.profile" ]; then
-. "${HOME}/.profile"
+  # shellcheck disable=SC1090
+  . "${HOME}/.profile"
 fi
 
 if [ -n "${BASH_VERSION}" ]; then
-    if [ -f "${HOME}/.bashrc" ]; then
-	. "${HOME}/.bashrc"
-    fi
+  if [ -f "${HOME}/.bashrc" ]; then
+    # shellcheck disable=SC1090
+    . "${HOME}/.bashrc"
+  fi
 fi
 

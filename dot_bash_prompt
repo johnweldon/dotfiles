@@ -19,6 +19,7 @@
 #
 #   https://gist.github.com/31967
 
+# shellcheck disable=SC2034
 # The various escape codes that we can use to color our prompt.
        BLACK="\[\033[0;30m\]"
  LIGHT_BLACK="\[\033[1;30m\]"
@@ -75,28 +76,38 @@ function set_k8s_prompt () {
   if command -v kubectl > /dev/null 2>&1 ; then
     CONTEXT=$(set_k8s_context)
     NAMESPACE=$(set_k8s_namespace)
-    K8S="${LIGHT_BLACK}[${BLUE}${CONTEXT}|${NAMESPACE}${LIGHT_BLACK}]${COLOR_NONE}"
+    K8S="${LIGHT_BLACK}[${LIGHT_BLUE}${CONTEXT}|${BLUE}${NAMESPACE}${LIGHT_BLACK}]${COLOR_NONE}"
   else
     K8S=""
   fi
 }
 
+function set_shlvl_prompt() {
+  if [ -n "${SSH_TTY}" ] ; then
+    SSH_SESSION="${YELLOW} -ssh- ${COLOR_NONE}"
+  else
+    SSH_SESSION=""
+  fi
+  SHLVL_PROMPT="${SSH_SESSION} ${LIGHT_CYAN}(${SHLVL})${COLOR_NONE}"
+}
+
 # Return the prompt symbol to use, colorized based on the return value of the
 # previous command.
 function set_prompt_symbol () {
-  if test $1 -eq 0 ; then
-      PROMPT_SYMBOL="\$"
+  if test "$1" -eq 0 ; then
+    PROMPT_SYMBOL="\$"
   else
-      PROMPT_SYMBOL="${LIGHT_RED}\$${COLOR_NONE}"
+    PROMPT_SYMBOL="${LIGHT_RED}\$${COLOR_NONE}"
   fi
 }
 
 # Determine active Python virtualenv details.
 function set_virtualenv () {
   if test -z "$VIRTUAL_ENV" ; then
-      PYTHON_VIRTUALENV=""
+    PYTHON_VIRTUALENV=""
   else
-      PYTHON_VIRTUALENV="${BLUE}[`basename \"$VIRTUAL_ENV\"`]${COLOR_NONE} "
+    # shellcheck disable=SC2006
+    PYTHON_VIRTUALENV="${BLUE}[`basename \"$VIRTUAL_ENV\"`]${COLOR_NONE} "
   fi
 }
 
@@ -115,9 +126,12 @@ function set_bash_prompt () {
   # set k8s prompt
   set_k8s_prompt
 
+  # set shell level
+  set_shlvl_prompt
+
   # Set the bash prompt variable.
   PS1="
-${PYTHON_VIRTUALENV}${GREEN}\u@\h${COLOR_NONE}:${LIGHT_YELLOW}\w${COLOR_NONE}${BRANCH}${K8S}
+${PYTHON_VIRTUALENV}${GREEN}\u${LIGHT_GREEN}@\h${COLOR_NONE}:${LIGHT_YELLOW}\w${COLOR_NONE}${BRANCH}${K8S} ${SHLVL_PROMPT}
 ${PROMPT_SYMBOL} "
 }
 
