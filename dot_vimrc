@@ -9,6 +9,7 @@ set background=dark
 set viminfo=""
 set visualbell t_vb="<Esc>|1f"
 set noerrorbells
+set nowrap
 
 if filereadable(findfile("~/.local.vimrc"))
   source ~/.local.vimrc
