@@ -137,6 +137,9 @@ if command -v pyenv > /dev/null 2>&1 ; then
   eval "$(pyenv init -)"
 fi
 
+# shellcheck disable=SC1090
+[ -f "${HOME}/.local.bashrc" ] && source "${HOME}/.local.bashrc"
+
 function start_ssh_agent() {
   # shellcheck disable=SC1090,SC1091
   if command -v ssh-agent > /dev/null 2>&1 ; then
