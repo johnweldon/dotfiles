@@ -133,10 +133,6 @@ if command -v direnv > /dev/null 2>&1 ; then
   eval "$(direnv hook bash)"
 fi
 
-if command -v pyenv > /dev/null 2>&1 ; then
-  eval "$(pyenv init -)"
-fi
-
 # shellcheck disable=SC1090
 [ -f "${HOME}/.local.bashrc" ] && source "${HOME}/.local.bashrc"
 
