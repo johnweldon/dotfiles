@@ -5,6 +5,25 @@
 [init]
   defaultBranch = main
 
+[pull]
+  ff = only
+
+[push]
+  default = simple
+
+[apply]
+  whitespace = fix
+
+[format]
+  pretty = %C(bold red)%h%Creset %C(white)%ad%Creset %Cgreen%aN%Creset %C(bold normal)%s%Creset %C(auto)%d%Creset
+
+[http]
+  cookiefile = {{ .chezmoi.homedir }}/.local/.gitcookies
+
+[log]
+  date = relative
+  decorate = auto
+
 [include]
   path = .git.aliases
   path = .local.gitconfig

@@ -1,19 +1,32 @@
 
 [alias]
-  s = status -s
-  b = branch -vva
+  b  = branch -vva
   co = checkout
-
+  s  = status -s
   sm = submodule
 
-  ls = ls-files
-  lsm = ls-files -m
-  un = ls-files -o --exclude-standard
+  l   = log -n 25 --graph
+  la  = log --all
+  lg  = log --graph
+  lga = log --graph --all
+  ll  = log
+
+  ls  = ls-files
   lsc = diff --cached --name-only --diff-filter=ARMTC --relative
-  lsu = diff --name-only --diff-filter=U --relative
   lsf = "!f() { git diff-tree --no-commit-id --name-only -r ${1:-HEAD}; }; f"
+  lsm = ls-files -m
+  lsu = diff --name-only --diff-filter=U --relative
+  un  = ls-files -o --exclude-standard
 
-  d = "!git diff-index --quiet HEAD -- ; git diff --patch-with-stat"
+  d  = "!f() { git diff-index --quiet HEAD -- ; git diff --patch-with-stat; }; f"
   dc = diff --cached --minimal --word-diff -w
-  dw = "!git diff-index --quiet HEAD -- ; git diff --word-diff=color --patch-with-stat"
+  dw = "!f() { git diff-index --quiet HEAD -- ; git diff --word-diff=color --patch-with-stat; }; f"
+  sh = "!f() { git show --pretty=fuller --minimal --word-diff -w ${1:-HEAD}; }; f"
 
+  amend        = commit --amend --reuse-message=HEAD
+  authors      = shortlog --summary --numbered
+  branches     = branch -a
+  contributors = shortlog --summary --numbered
+  ignored      = !git ls-files -v | grep "^[[:lower:]]"
+  remotes      = remote -v
+  tags         = tag -l
