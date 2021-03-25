@@ -23,6 +23,8 @@
   dw = "!f() { git diff-index --quiet HEAD -- ; git diff --word-diff=color --patch-with-stat; }; f"
   sh = "!f() { git show --pretty=fuller --minimal --word-diff -w ${1:-HEAD}; }; f"
 
+  f = "!f() { git fetch --all --tags --prune; }; f"
+
   amend        = commit --amend --reuse-message=HEAD
   authors      = shortlog --summary --numbered
   branches     = branch -a
@@ -30,3 +32,5 @@
   ignored      = !git ls-files -v | grep "^[[:lower:]]"
   remotes      = remote -v
   tags         = tag -l
+
+  push-all = "!f() { for remote in $(git remote); do git push $remote; done; }; f"
