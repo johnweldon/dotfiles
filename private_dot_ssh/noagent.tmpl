@@ -1,0 +1,1 @@
+{{ with (index . "ssh") }}{{ with (index . "no_agent") }}# prevent ssh-agent from starting{{ end }}{{ end }}
