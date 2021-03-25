@@ -1,0 +1,2 @@
+{{ with (index . "ssh") }}{{ with (index . "authorized_keys") }}{{ range . }}{{ . }}
+{{ end }}{{ end }}{{ end }} 
