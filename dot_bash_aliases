@@ -5,7 +5,9 @@
 
 # ls Aliases
 
-alias ls='ls -CF'
+alias ls='\ls -CFG'
+(command ls --help 2>&1 | grep -q -- --color) && alias ls='\ls --color=auto -F'
+
 alias la='ls -a'
 alias ll='ls -l'
 alias lat='ls -lat'
