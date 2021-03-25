@@ -39,14 +39,33 @@ LIGHT_PURPLE="\[\033[1;35m\]"
  LIGHT_WHITE="\[\033[1;37m\]"
   COLOR_NONE="\[\e[0m\]"
 
+function swatch() {
+  echo "black${BLACK}black${COLOR_NONE}"
+  echo "light black${LIGHT_BLACK}light black${COLOR_NONE}"
+  echo "red${RED}red${COLOR_NONE}"
+  echo "light red${LIGHT_RED}light red${COLOR_NONE}"
+  echo "green${GREEN}green${COLOR_NONE}"
+  echo "light green${LIGHT_GREEN}light green${COLOR_NONE}"
+  echo "yellow${YELLOW}yellow${COLOR_NONE}"
+  echo "light yellow${LIGHT_YELLOW}light yellow${COLOR_NONE}"
+  echo "blue${BLUE}blue${COLOR_NONE}"
+  echo "light blue${LIGHT_BLUE}light blue${COLOR_NONE}"
+  echo "purple${PURPLE}purple${COLOR_NONE}"
+  echo "light purple${LIGHT_PURPLE}light purple${COLOR_NONE}"
+  echo "cyan${CYAN}cyan${COLOR_NONE}"
+  echo "light cyan${LIGHT_CYAN}light cyan${COLOR_NONE}"
+  echo "white${WHITE}white${COLOR_NONE}"
+  echo "light white${LIGHT_WHITE}light white${COLOR_NONE}"
+}
+
 # determine git branch name
 function parse_git_branch() {
-  command git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ (\1)/'
+  command git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1)/'
 }
 
 function parse_git_dirty() {
   if test -n "$(git status --porcelain)" ; then
-    echo -n "*"
+    echo -n " *"
   fi
 }
 
@@ -58,7 +77,7 @@ function set_git_branch() {
     dirty=$(parse_git_dirty)
 
     # Set the final branch string.
-    BRANCH="${PURPLE}${branch}${dirty}${COLOR_NONE} "
+    BRANCH="${RED}${branch}${LIGHT_RED}${dirty}${COLOR_NONE} "
   else
     BRANCH=""
   fi
@@ -76,7 +95,11 @@ function set_k8s_prompt () {
   if command -v kubectl > /dev/null 2>&1 ; then
     CONTEXT=$(set_k8s_context)
     NAMESPACE=$(set_k8s_namespace)
-    K8S="${LIGHT_BLACK}[${LIGHT_BLUE}${CONTEXT}|${BLUE}${NAMESPACE}${LIGHT_BLACK}]${COLOR_NONE}"
+    if [ -n "${NAMESPACE}" ] ; then
+      K8S="${LIGHT_GREEN}${CONTEXT}${WHITE}|${GREEN}${NAMESPACE}${COLOR_NONE} "
+    else
+      K8S="${LIGHT_GREEN}${CONTEXT}${COLOR_NONE} "
+    fi
   else
     K8S=""
   fi
@@ -84,7 +107,7 @@ function set_k8s_prompt () {
 
 function set_shlvl_prompt() {
   if [ -n "${SSH_TTY}" ] ; then
-    SSH_SESSION="${YELLOW} -ssh- ${COLOR_NONE}"
+    SSH_SESSION="${YELLOW}-ssh-${COLOR_NONE} "
   else
     SSH_SESSION=""
   fi
@@ -97,7 +120,7 @@ function set_prompt_symbol () {
   if test "$1" -eq 0 ; then
     PROMPT_SYMBOL="\$"
   else
-    PROMPT_SYMBOL="${LIGHT_RED}\$${COLOR_NONE}"
+    PROMPT_SYMBOL="${LIGHT_RED}$1 \$${COLOR_NONE}"
   fi
 }
 
@@ -107,8 +130,12 @@ function set_virtualenv () {
     PYTHON_VIRTUALENV=""
   else
     # shellcheck disable=SC2006
-    PYTHON_VIRTUALENV="${BLUE}[`basename \"$VIRTUAL_ENV\"`]${COLOR_NONE} "
+    PYTHON_VIRTUALENV="${LIGHT_WHITE}[`basename \"$VIRTUAL_ENV\"`]${COLOR_NONE} "
   fi
+}
+
+function set_date_prompt () {
+  DATE_PROMPT="${WHITE}$(date +'%H:%M:%S')${COLOR_NONE} "
 }
 
 # Set the full bash prompt.
@@ -126,13 +153,15 @@ function set_bash_prompt () {
   # set k8s prompt
   set_k8s_prompt
 
-  # set shell level
-  set_shlvl_prompt
+  # set date string
+  set_date_prompt
+
+  USERLINE="${LIGHT_CYAN}\u${CYAN}@\h${COLOR_NONE}:${LIGHT_YELLOW}\w${COLOR_NONE} "
 
   # Set the bash prompt variable.
   PS1="
-${PYTHON_VIRTUALENV}${GREEN}\u${LIGHT_GREEN}@\h${COLOR_NONE}:${LIGHT_YELLOW}\w${COLOR_NONE}${BRANCH}${K8S} ${SHLVL_PROMPT}
-${PROMPT_SYMBOL} "
+${PYTHON_VIRTUALENV}${USERLINE}${BRANCH}${K8S}
+${DATE_PROMPT}${PROMPT_SYMBOL} "
 }
 
 # Tell bash to execute this function just before displaying its prompt.
