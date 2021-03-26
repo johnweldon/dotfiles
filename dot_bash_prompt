@@ -156,7 +156,7 @@ function set_bash_prompt () {
   # set date string
   set_date_prompt
 
-  USERLINE="${LIGHT_CYAN}\u${CYAN}@\h${COLOR_NONE}:${LIGHT_YELLOW}\w${COLOR_NONE} "
+  USERLINE="${CYAN}\u@${LIGHT_CYAN}\h${COLOR_NONE}:${LIGHT_YELLOW}\w${COLOR_NONE} "
 
   # Set the bash prompt variable.
   PS1="
