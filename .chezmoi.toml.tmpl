@@ -4,10 +4,10 @@
 {{- $tz := "" -}}
 
 {{- with (index . "user") -}}
-{{-   $name = index . "name" -}}
-{{-   $email = index . "email" -}}
-{{-   $github = index . "github" -}}
-{{-   $tz = index . "tz" -}}
+{{-   with (index . "name") -}}{{- $name = . -}}{{- end -}}
+{{-   with (index . "email") -}}{{- $email = . -}}{{- end -}}
+{{-   with (index . "github") -}}{{- $github = . -}}{{- end -}}
+{{-   with (index . "tz") -}}{{- $tz = . -}}{{- end -}}
 {{- end -}}
 
 
@@ -16,11 +16,9 @@
 {{- $config := "" -}}
 
 {{- with (index . "ssh") -}}
-{{-   if (hasKey . "no_agent") -}}
-{{-     $noagent = get . "no_agent" -}}
-{{-   end -}}
-{{-   $authorized_keys = index . "authorized_keys" -}}
-{{-   $config = index . "config" -}}
+{{-   with (index . "no_agent") -}}{{- $noagent = . -}}{{- end -}}
+{{-   with (index . "authorized_keys") -}}{{- $authorized_keys = . -}}{{- end -}}
+{{-   with (index . "config") -}}{{- $config = . -}}{{- end -}}
 {{- end -}}
 
 {{- if (eq $name "") -}}
