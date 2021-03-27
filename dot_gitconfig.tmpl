@@ -1,7 +1,9 @@
+{{- with (index . "user") -}}
 [user]
-  name = {{ .user.name }}
-  email = {{ .user.email }}
+  name = {{ .name | quote }}
+  email = {{ .email | quote }}
 
+{{ end -}}
 [core]
   excludesfile = ~/.local.gitignore
 

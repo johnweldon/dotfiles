@@ -1,14 +1,57 @@
+{{- $name := "" -}}
+{{- $email := "" -}}
+{{- $github := "" -}}
+{{- $tz := "" -}}
+
+{{- with (index . "user") -}}
+{{-   $name = index . "name" -}}
+{{-   $email = index . "email" -}}
+{{-   $github = index . "github" -}}
+{{-   $tz = index . "tz" -}}
+{{- end -}}
+
+
+{{- $noagent := false -}}
+{{- $authorized_keys := "" -}}
+{{- $config := "" -}}
+
+{{- with (index . "ssh") -}}
+{{-   if (hasKey . "no_agent") -}}
+{{-     $noagent = get . "no_agent" -}}
+{{-   end -}}
+{{-   $authorized_keys = index . "authorized_keys" -}}
+{{-   $config = index . "config" -}}
+{{- end -}}
+
+{{- if (eq $name "") -}}
+{{-   $name = promptString "Display Name" -}}
+{{- end -}}
+
+{{- if (eq $email "") -}}
+{{-   $email = promptString "Email Address" -}}
+{{- end -}}
+
+{{- if (eq $github "") -}}
+{{-   $github = promptString "GitHub ID (for importing authorized ssh keys)" -}}
+{{- end -}}
+
+{{- if (eq $tz "") -}}
+{{-   $tz = "America/Phoenix" -}}
+{{- end -}}
 
 [data]
-  [data.user]
-    name = "John Weldon"
-    email = "johnweldon4@gmail.com"
-    tz = "America/Phoenix"
-  [data.ssh]
-    no_agent = false
-    authorized_keys = [
-      "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDAdoxC5Ubr5pVmL3oKwbaQlf81vF+YCEuLZDmphYDK9QmypQYRUG1r9MugGg3MyMyI1byifXzXTSXGTbWsDganCsnwtfRuMtcFInpZC+b41Rv0t9gIORIt7D0tMHKCMuUSI1aUWzxBQp2HGnXd/v79CDUlk5Vxa+VgWU225qcmgMj0xT4JJylZanI8Fegm0/5K7GJ7OMdkLh8xqSRvlyzvBwSziKoZ8j8gtHAfDobZUE8RcRZrUYIYIN26Kfj7ASMWuY1YCLXBAOmIBvG1Xwjj4M89aHtmHuQHleHP+aWaij+meuJWVaa1E5/gRw1ixJpGU+kqB0AiU52SzCjUt5nQHImWO5zgSEjO4GCU7bwJ92OihRpvNZutO1z3JBZZVhJ2Z3i4aoITaBEHahyWd+C9OUaUnETg1sDvUTHuNOJFM+ZXXtdlC1OyKX3QKFdG2DonJsOO375QWfSlUFA2XxjvZgCWb50SnjVbAegkH22MLTU77xHhVmoz5b9J+rGZG1MAzY4FjYNKZ6NnYqZEAVVQEKWp/HuTOwspQ3TmcQQVllhXgXKzk08HcVt1kOS/ZyYTbZcIlLhFnN4VVJUCdLID+eFmChIukPyIIFwNcIhWqwHKH6YS2r+lM9hsYKSbqkY4gDgZEKNNXoyy7ZFxEVgWNapuMiKP380pR44I5sVPUw== johnweldon",
-    ]
-    config = """
-"""
 
+  [data.user]
+    name = {{ $name | quote }}
+    email = {{ $email | quote }}
+    github = {{ $github | quote }}
+    tz = {{ $tz | quote }}
+
+  [data.ssh]
+    no_agent = {{ $noagent }}
+    authorized_keys = [{{ with $authorized_keys}}{{ range . }}
+      {{ . | quote }},{{ end }}
+    {{ end }}]
+
+    config = """
+{{ $config }}"""
