@@ -22,3 +22,6 @@ alias dps="docker ps --format '{{ printf \"%-30s %-20s %s\" .Names .Status .Port
 alias tf='terraform'
 alias k='kubectl'
 alias python='python3'
+alias gi=git
+alias g=git
+
