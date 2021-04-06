@@ -1,0 +1,17 @@
+#!/usr/bin/env python3
+
+import os
+import subprocess
+
+pull_command = """
+if ( git rev-parse @{u} > /dev/null 2>&1 )
+then
+    pwd
+    git pull
+fi
+"""
+
+for root, dir, files in os.walk("."):
+    if ".git" in dir:
+        cmd = f"bash -lc '( cd {root}; {pull_command} )'"
+        subprocess.run(cmd, shell=True)

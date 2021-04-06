@@ -1,0 +1,14 @@
+#!/usr/bin/env python3
+
+import os
+import subprocess
+
+status_command = """
+pwd
+git status --short --branch --show-stash
+"""
+
+for root, dir, files in os.walk("."):
+    if ".git" in dir:
+        cmd = f"bash -lc '( cd {root}; {status_command} )'"
+        subprocess.run(cmd, shell=True)

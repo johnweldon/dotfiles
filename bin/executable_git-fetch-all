@@ -1,0 +1,17 @@
+#!/usr/bin/env python3
+
+import os
+import subprocess
+
+fetch_command = """
+pwd
+for remote in $(git remote); do
+    echo -n "$remote ... "
+    git fetch $remote && echo ok
+done
+"""
+
+for root, dir, files in os.walk("."):
+    if ".git" in dir:
+        cmd = f"bash -lc '( cd {root}; {fetch_command} )'"
+        subprocess.run(cmd, shell=True)
