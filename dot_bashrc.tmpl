@@ -49,6 +49,20 @@ if ! shopt -oq posix; then
   fi
 fi
 
+{{ if eq .chezmoi.os "darwin" -}}
+(command -v brew > /dev/null ) && {
+  HOMEBREW_PREFIX="$(brew --prefix)"
+  if [[ -r "${HOMEBREW_PREFIX}/etc/profile.d/bash_completion.sh" ]]; then
+    source "${HOMEBREW_PREFIX}/etc/profile.d/bash_completion.sh"
+  else
+    for COMPLETION in "${HOMEBREW_PREFIX}/etc/bash_completion.d/"*; do
+      [[ -r "$COMPLETION" ]] && source "$COMPLETION"
+    done
+  fi
+}
+
+{{ end -}}
+
 if [ -f ~/.bash_prompt ]; then
   # shellcheck disable=SC1090,SC1091
   . ~/.bash_prompt
