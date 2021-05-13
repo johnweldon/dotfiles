@@ -12,6 +12,8 @@ set noerrorbells
 set nowrap
 set noswapfile
 
+set autowriteall
+
 let g:ale_completion_autoimport = 1
 let g:ale_completion_enabled = 1
 set omnifunc=ale#completion#OmniFunc
