@@ -1,0 +1,79 @@
+#
+# Desktop service for synergyc
+#
+.config/autostart/synergy_autostart.desktop
+echo <<EOF
+[Desktop Entry]
+Name=Synergy
+Comment=Synergy Client
+Type=Application
+Exec=/usr/bin/synergyc --enable-crypto 10.36.10.36
+X-GNOME-Autostart-enabled=true
+EOF
+
+
+#
+# Window Manager service for synergy
+#
+/usr/local/bin/lightdm_greeter_setup
+echo <<EOF
+#!/usr/bin/env bash
+
+trap cleanup TERM EXIT
+
+cleanup()
+{
+    trap - TERM EXIT
+    if [ -n "$DBUS_SESSION_BUS_PID" ]; then
+        kill "$DBUS_SESSION_BUS_PID"
+    fi
+    if [ -n "$CMD_PID" ]; then
+        kill "$CMD_PID"
+    fi
+    exit 0
+}
+
+[ -n "$DBUS_SESSION_BUS_ADDRESS" ] || eval `dbus-launch --sh-syntax`
+
+/usr/bin/killall synergyc
+while [ $(pgrep -x synergyc) ]; do sleep 0.1; done
+/usr/bin/synergyc --enable-crypto 10.36.10.36
+
+exec $@ &
+CMD_PID=$!
+wait $CMD_PID
+CMD_PID=
+EOF
+
+/usr/local/bin/lightdm_session_setup
+echo <<EOF
+#!/usr/bin/env bash
+
+/usr/bin/killall synergyc
+while [ $(pgrep -x synergyc) ]; do sleep 0.1; done
+/usr/bin/synergyc --enable-crypto 10.36.10.36
+
+exec /usr/lib/lightdm/lightdm-guest-session
+EOF
+
+
+#
+# User "trusted" TLS fingerprints
+#
+.synergy/SSL/Fingerprints/TrustedServers.txt
+
+
+#
+# Desktop "trusted" TLS fingerprints
+#
+/var/lib/lightdm/.synergy/SSL/Fingerprints/TrustedServers.txt
+
+
+#
+# LightDM Conf
+#
+/usr/share/lightdm/lightdm.conf.d/99-custom.conf
+echo <<EOF
+[Seat:*]
+greeter-wrapper=/usr/local/bin/lightdm_greeter_setup
+EOF
