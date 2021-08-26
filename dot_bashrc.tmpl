@@ -105,4 +105,4 @@ function start_ssh_agent() {
   }
 }
 
-[ ! -f "{{ .chezmoi.homedir }}/.ssh/noagent" ] && start_ssh_agent
+[ ! -f "{{ .chezmoi.homeDir }}/.ssh/noagent" ] && start_ssh_agent
