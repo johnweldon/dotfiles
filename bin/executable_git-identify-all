@@ -6,7 +6,7 @@ command = """
 pwd
 for remote in $(git remote); do
     echo -n "$remote ... "
-    git fetch $remote && echo ok
+    git remote -v
 done
 """
 
