@@ -2,7 +2,8 @@ import os
 import subprocess
 
 
-ignored_dirs = list(filter(None, ["node_modules", ".terraform", "dist", ".git", ".idea"] + os.getenv("GIT_ALL_IGNORE").split(":")))
+ignored_dirs = os.getenv("GIT_ALL_IGNORE", "").split(":")
+ignored_dirs = list(filter(None, ["node_modules", ".terraform", "dist", ".git", ".idea"] + ignored_dirs))
 
 
 def all_git_dirs(action: str, start_dir="."):
