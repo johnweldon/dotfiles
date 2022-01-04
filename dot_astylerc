@@ -1,0 +1,12 @@
+style=google
+indent=spaces=2
+break-blocks
+pad-oper
+pad-paren-out
+delete-empty-lines
+align-pointer=type
+add-braces
+break-return-type
+max-code-length=120
+break-after-logical
+suffix=none
