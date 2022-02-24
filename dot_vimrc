@@ -54,6 +54,11 @@ if filereadable(findfile("~/.local.vimrc"))
   source ~/.local.vimrc
 endif
 
+let s:local_vimrc = findfile(".local.vimrc", ".;")
+if filereadable(s:local_vimrc)
+  exec "source " . s:local_vimrc
+endif
+
 if v:version >= 800
   packloadall
 endif
