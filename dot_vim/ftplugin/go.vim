@@ -7,8 +7,8 @@ let b:did_ftplugin = 1
 let b:ale_completion_enabled = 1
 let b:ale_fix_on_save = 1
 
-let b:ale_fixers = ['goimports', 'remove_trailing_lines', 'trim_whitespace']
-let b:ale_linters = ['gopls', 'golangci-lint']
+let b:ale_fixers = ['gofumpt', 'goimports', 'remove_trailing_lines', 'trim_whitespace']
+let b:ale_linters = ['gopls']
 
 " mappings
 nmap <buffer> <LocalLeader>r :GoImports<cr>
