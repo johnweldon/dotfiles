@@ -1,39 +1,45 @@
 {{- with (index . "user") -}}
 [user]
-  name = {{ .name | quote }}
-  email = {{ .email | quote }}
+	name = {{ .name | quote }}
+	email = {{ .email | quote }}
 
 {{ end -}}
 [core]
-  excludesfile = ~/.local.gitignore
+	excludesfile = ~/.local.gitignore
 
 [init]
-  defaultBranch = main
+	defaultBranch = main
 
 [pull]
-  ff = only
+	ff = only
+	rebase = true
+
+[rebase]
+	autoStash = true
 
 [push]
-  default = simple
+	default = simple
 
 [apply]
-  whitespace = fix
+	whitespace = fix
 
 [diff "pdf"]
-  textconv = pdftostdout
+	textconv = pdftostdout
 
 [format]
-  pretty = %C(bold red)%h%Creset %C(white)%ad%Creset %Cgreen%aN%Creset %C(bold normal)%s%Creset %C(auto)%d%Creset
+	pretty = %C(bold red)%h%Creset %C(white)%ad%Creset %Cgreen%aN%Creset %C(bold normal)%s%Creset %C(auto)%d%Creset
 
 [http]
 	cookiefile = {{ .chezmoi.homeDir }}/.gitcookies
 
 [log]
-  abbrevCommit = true
-  date = relative
-  decorate = auto
+	abbrevCommit = true
+	date = relative
+	decorate = auto
 
 [include]
-  path = .git.aliases
-  path = .local.gitconfig
+	path = .git.aliases
+	path = .local.gitconfig
+
+# vi:set noet ci pi sts=0 sw=2 ts=2:
 
