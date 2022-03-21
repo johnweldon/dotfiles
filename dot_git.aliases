@@ -1,6 +1,7 @@
 
 [alias]
   b  = branch -vva
+  br = branch -vv
   co = checkout
   s  = status -s
   sm = submodule
