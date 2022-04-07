@@ -1,0 +1,16 @@
+#!/usr/bin/env python3
+
+import sys
+import git_helpers
+
+if len(sys.argv) != 2:
+    sys.exit("error: expect one argument with search pattern")
+
+pat = sys.argv[1]
+
+command = f"""
+pwd
+git rev-list --all | xargs git grep --break --heading --line-number --full-name -e "{pat}"
+"""
+
+git_helpers.all_git_dirs(command)
