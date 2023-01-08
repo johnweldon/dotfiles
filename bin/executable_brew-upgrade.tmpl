@@ -5,6 +5,6 @@ set -e
 
 for subcmd in update "upgrade --greedy" cleanup; do
   echo -e "\033[1;33mbrew ${subcmd}\033[0;39m"
-  brew ${subcmd}
+  /usr/local/bin/brew ${subcmd}
 done
 {{- end }}
