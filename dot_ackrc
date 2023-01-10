@@ -1,6 +1,7 @@
 --ignore-dir=.git
 --ignore-dir=.idea
 --ignore-dir=.terraform
+--ignore-dir=vendor
 --ignore-dir=venv
 --ignore-file=ext:tfstate
 --ignore-file=ext:backup
