@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+set -e
+
+opt=""
+case "$(openssl version)" in
+  Libre*)
+    opt=""
+    ;;
+  OpenSSL*)
+    opt="-ext subjectAltName"
+    ;;
+  *)
+    opt="-purpose"
+    ;;
+esac
+
+for p in "$@"; do
+  # Split argument on : delimeter
+  # shellcheck disable=SC2206
+  s=(${p//:/ })
+
+  # Set host and port based on split
+  host="${s[0]}"
+  port="${s[1]}"
+
+  # Use default port if none provided
+  [ -n "${port}" ] || port=443
+
+  # Check cert
+  # shellcheck disable=SC2086
+  echo | \
+    openssl s_client -servername "${host}" -connect "${host}:${port}" 2> /dev/null | \
+    openssl x509 -noout -issuer -subject -fingerprint -dates -email ${opt}
+done
