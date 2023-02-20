@@ -1,0 +1,15 @@
+{{ if eq .chezmoi.os "linux" -}}
+#!/usr/bin/env bash
+
+GEOMETRY="${GEOMETRY:-2540x1440}"
+DEPTH="${DEPTH:-24}"
+
+export GEOMETRY
+
+xvfb-run \
+  --auto-servernum \
+  --auth-file="{{ .chezmoi.homeDir }}/.vnc/.Xauth" \
+  --error-file="{{ .chezmoi.homeDir }}/.vnc/xvfb.log" \
+  --server-args="-screen 0 ${GEOMETRY}x${DEPTH}" \
+  "{{ .chezmoi.homeDir }}/.vnc/xstartup"
+{{- end }}

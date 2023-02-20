@@ -1,0 +1,18 @@
+{{ if eq .chezmoi.os "linux" -}}
+#!/usr/bin/env bash
+
+set -e
+
+x11vnc \
+  -geometry "${GEOMETRY:-1024x768}" \
+  -logfile "{{ .chezmoi.homeDir }}/.vnc/%VNCDISPLAY.log" \
+  -rc "{{ .chezmoi.homeDir }}/.vnc/.x11vncrc" \
+  -localhost \
+  -bg 
+
+[ -f "{{ .chezmoi.homeDir }}/.vnc/.Xresources" ] && xrdb "{{ .chezmoi.homeDir }}/.vnc/.Xresources"
+
+xsetroot -solid grey
+
+i3
+{{- end }}
