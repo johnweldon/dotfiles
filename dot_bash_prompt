@@ -117,10 +117,15 @@ function set_shlvl_prompt() {
 # Return the prompt symbol to use, colorized based on the return value of the
 # previous command.
 function set_prompt_symbol () {
-  if test "$1" -eq 0 ; then
-    PROMPT_SYMBOL="\$"
+  if test "$(id -u)" -eq 0; then
+    SYM="#"
   else
-    PROMPT_SYMBOL="${LIGHT_RED}$1 \$${COLOR_NONE}"
+    SYM="\$"
+  fi
+  if test "$1" -eq 0 ; then
+    PROMPT_SYMBOL="${SYM}"
+  else
+    PROMPT_SYMBOL="${LIGHT_RED}$1 ${SYM}${COLOR_NONE}"
   fi
 }
 
