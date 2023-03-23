@@ -7,9 +7,9 @@ DEPTH="${DEPTH:-24}"
 export GEOMETRY
 
 xvfb-run \
-  --server-num=1 \
+  --auto-servernum \
   --auth-file="{{ .chezmoi.homeDir }}/.vnc/.Xauth" \
   --error-file="{{ .chezmoi.homeDir }}/.vnc/xvfb.log" \
   --server-args="-screen 0 ${GEOMETRY}x${DEPTH}" \
-  "{{ .chezmoi.homeDir }}/.vnc/xstartup"
+  "{{ .chezmoi.homeDir }}/.vnc/xstartup.ssh"
 {{- end }}

@@ -7,8 +7,7 @@ x11vnc \
   -geometry "${GEOMETRY:-1024x768}" \
   -logfile "{{ .chezmoi.homeDir }}/.vnc/%VNCDISPLAY.log" \
   -rc "{{ .chezmoi.homeDir }}/.vnc/.x11vncrc" \
-  -allow 10.36. \
-  -listen 0.0.0.0 \
+  -localhost \
   -bg 
 
 [ -f "{{ .chezmoi.homeDir }}/.vnc/.Xresources" ] && xrdb "{{ .chezmoi.homeDir }}/.vnc/.Xresources"
