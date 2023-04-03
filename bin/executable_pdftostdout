@@ -1,1 +1,1 @@
-pdftotext $1 -
+pdftotext "$1" -
