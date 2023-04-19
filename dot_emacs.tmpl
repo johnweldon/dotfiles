@@ -15,7 +15,9 @@
  )
 
 ;; Misc
+{{- if eq .chezmoi.os "darwin" }}
 (add-to-list 'image-types 'svg)
+{{- end }}
 
 
 ;; MELPA
