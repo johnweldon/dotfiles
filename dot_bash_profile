@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-# shellcheck disable=SC1090
+# shellcheck disable=SC1090,SC1091
 [ -f "${HOME}/.profile" ] && . "${HOME}/.profile"
 
-# shellcheck disable=SC1090
+# shellcheck disable=SC1090,SC1091
 [ -f "${HOME}/.bashrc" ] && . "${HOME}/.bashrc"
 
 if command -v cleanpath > /dev/null 2>&1 ; then

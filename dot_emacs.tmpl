@@ -1,0 +1,84 @@
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(custom-enabled-themes '(modus-vivendi))
+ '(package-selected-packages
+   '(kubernetes-evil kubernetes org-roam evil company-go company go-mode lsp-mode use-package))
+ '(scroll-bar-mode nil))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+
+;; Misc
+(add-to-list 'image-types 'svg)
+
+
+;; MELPA
+(when (>= emacs-major-version 24)
+  (progn
+    (require 'package)
+    (add-to-list
+     'package-archives
+     '("melpa" . "https://melpa.org/packages/")
+     t))
+
+  (when (< emacs-major-version 27) (package-initialize)))
+
+(package-install 'company)
+(package-install 'company-go)
+(package-install 'lsp-mode)
+(package-install 'go-mode)
+(package-install 'evil)
+(package-install 'org-roam)
+(package-install 'kubernetes)
+(package-install 'kubernetes-evil)
+
+(require 'company)
+(require 'company-go)
+(require 'lsp-mode)
+(require 'go-mode)
+(require 'evil)
+(evil-mode 1)
+(require 'org-roam)
+(require 'kubernetes)
+(require 'kubernetes-evil)
+
+;; Font
+(set-face-attribute 'default nil :font "JetBrains Mono 15")
+
+
+;; Org Mode
+(global-set-key (kbd "C-c l") #'org-store-link)
+(global-set-key (kbd "C-c a") #'org-agenda)
+(global-set-key (kbd "C-c c") #'org-capture)
+
+
+{{ with (index . "user") }}{{ with (index . "org_roam_dir") -}}
+;; Org Roam
+(org-roam-db-autosync-mode)
+
+(use-package org-roam
+  :ensure t
+  :custom
+  (org-roam-directory {{ . | quote }})
+  (org-roam-completion-everywhere t)
+  :bind (("C-c n l" . org-roam-buffer-toggle)
+	 ("C-c n f" . org-roam-node-find)
+	 ("C-c n i" . org-roam-node-insert)
+	 :map org-mode-map
+	 ("C-M-i"   . completion-at-point))
+  :config
+  (org-roam-setup))
+{{- end }}{{ end }}
+
+
+;; Kubernetes
+(use-package kubernetes)
+(use-package kubernetes-evil
+  :ensure t
+  :after kubernetes)

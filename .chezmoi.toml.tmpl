@@ -2,12 +2,14 @@
 {{- $email := "" -}}
 {{- $github := "" -}}
 {{- $tz := "" -}}
+{{- $org_roam_dir := "" -}}
 
 {{- with (index . "user") -}}
 {{-   with (index . "name") -}}{{- $name = . -}}{{- end -}}
 {{-   with (index . "email") -}}{{- $email = . -}}{{- end -}}
 {{-   with (index . "github") -}}{{- $github = . -}}{{- end -}}
 {{-   with (index . "tz") -}}{{- $tz = . -}}{{- end -}}
+{{-   with (index . "org_roam_dir") -}}{{- $org_roam_dir = . -}}{{- end -}}
 {{- end -}}
 
 
@@ -16,7 +18,7 @@
 {{- $config := "" -}}
 
 {{- with (index . "ssh") -}}
-{{-   with (index . "no_agent") -}}{{- $noagent = . -}}{{- end -}}
+{{-   if hasKey . "no_agent" -}}{{- $noagent = (index . "no_agent") -}}{{- end -}}
 {{-   with (index . "authorized_keys") -}}{{- $authorized_keys = . -}}{{- end -}}
 {{-   with (index . "config") -}}{{- $config = . -}}{{- end -}}
 {{- end -}}
@@ -44,6 +46,7 @@
     email = {{ $email | quote }}
     github = {{ $github | quote }}
     tz = {{ $tz | quote }}
+    org_roam_dir = {{ $org_roam_dir | quote }}
 
   [data.ssh]
     no_agent = {{ $noagent }}
