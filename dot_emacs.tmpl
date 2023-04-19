@@ -1,3 +1,4 @@
+;; -*- mode: Lisp -*-
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -14,6 +15,11 @@
  ;; If there is more than one, they won't work right.
  )
 
+
+;; Font
+(set-face-attribute 'default nil :font "JetBrains Mono 15")
+
+
 ;; Misc
 {{- if eq .chezmoi.os "darwin" }}
 (add-to-list 'image-types 'svg)
@@ -21,15 +27,9 @@
 
 
 ;; MELPA
-(when (>= emacs-major-version 24)
-  (progn
-    (require 'package)
-    (add-to-list
-     'package-archives
-     '("melpa" . "https://melpa.org/packages/")
-     t))
-
-  (when (< emacs-major-version 27) (package-initialize)))
+(require 'package)
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+(package-initialize)
 
 (package-install 'company)
 (package-install 'company-go)
@@ -41,31 +41,32 @@
 (package-install 'org-roam)
 (package-install 'package)
 (package-install 'use-package)
+(package-install 'yaml-mode)
 
-(require 'company)
-(require 'company-go)
-(require 'evil)
-(require 'go-mode)
-(require 'kubernetes)
-(require 'kubernetes-evil)
-(require 'lsp-mode)
-(require 'org-roam)
-(require 'package)
 (require 'use-package)
 
+
+;; Company
+(require 'company)
+
+
+;; Evil
+(require 'evil)
 (evil-mode 1)
 
-;; Font
-(set-face-attribute 'default nil :font "JetBrains Mono 15")
+(require 'lsp-mode)
+(require 'yaml-mode)
 
 
 ;; Org Mode
+(require 'org-roam)
+
 (global-set-key (kbd "C-c l") #'org-store-link)
 (global-set-key (kbd "C-c a") #'org-agenda)
 (global-set-key (kbd "C-c c") #'org-capture)
 
+{{ with (index . "user") }}{{ with (index . "org_roam_dir") }}
 
-{{ with (index . "user") }}{{ with (index . "org_roam_dir") -}}
 ;; Org Roam
 (use-package org-roam
   :ensure t
@@ -80,11 +81,25 @@
 	 ("C-M-i"   . completion-at-point))
   :config
   (org-roam-setup))
-{{- end }}{{ end }}
 
+{{ end }}{{ end }}
 
 ;; Kubernetes
+(require 'kubernetes)
+(require 'kubernetes-evil)
+
 (use-package kubernetes)
 (use-package kubernetes-evil
   :ensure t
   :after kubernetes)
+
+
+;; Go
+(require 'company-go)
+(require 'go-mode)
+
+(add-to-list 'auto-mode-alist '("\\.go\\'" . go-mode))
+
+
+;; Yaml
+(add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-mode))
