@@ -6,7 +6,7 @@
  ;; If there is more than one, they won't work right.
  '(custom-enabled-themes '(modus-vivendi))
  '(package-selected-packages
-   '(kubernetes-evil kubernetes org-roam evil company-go company go-mode lsp-mode use-package))
+   '(typescript-mode kubernetes-evil kubernetes org-roam evil company-go company go-mode lsp-mode use-package))
  '(scroll-bar-mode nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -18,6 +18,7 @@
 
 ;; Font
 (set-face-attribute 'default nil :font "JetBrains Mono 15")
+(menu-bar-mode -1)
 
 
 ;; Misc
@@ -40,6 +41,7 @@
 (package-install 'lsp-mode)
 (package-install 'org-roam)
 (package-install 'package)
+(package-install 'typescript-mode)
 (package-install 'use-package)
 (package-install 'yaml-mode)
 
@@ -99,6 +101,12 @@
 (require 'go-mode)
 
 (add-to-list 'auto-mode-alist '("\\.go\\'" . go-mode))
+
+
+;; Typescript
+(require 'typescript-mode)
+
+(add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-mode))
 
 
 ;; Yaml
