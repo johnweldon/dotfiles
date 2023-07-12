@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+NOTES_DIR="${NOTES_DIR:-${HOME}/shared/}"
+EDITOR="${EDITOR:-vim}"
+
+DATE="$(date "+%Y-%m-%d")"
+
+JOT_FILE_NAME="$( realpath "${NOTES_DIR}" )/NOTES-${DATE}.md"
+
+
+${EDITOR} "${JOT_FILE_NAME}"
