@@ -35,7 +35,11 @@ set wildmenu
 set display=lastline,uhex
 set formatoptions+=j
 
-colorscheme zaibatsu
+try
+  colorscheme zaibatsu
+catch /^Vim\%((\a\+)\)\=:E185/
+  colorscheme koehler
+endtry
 
 " CoC suggestions from https://github.com/neoclide/coc.nvim#example-vim-configuration
 
