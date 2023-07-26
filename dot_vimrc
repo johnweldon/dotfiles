@@ -43,13 +43,6 @@ if exists('+breakindent')
 endif
 set linebreak
 
-let g:ale_completion_autoimport = 1
-let g:ale_completion_enabled = 1
-set omnifunc=ale#completion#OmniFunc
-
-hi Error ctermbg=DarkRed
-hi SpellBad ctermbg=DarkRed
-
 if filereadable(findfile("~/.local.vimrc"))
   source ~/.local.vimrc
 endif
