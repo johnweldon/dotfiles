@@ -26,7 +26,7 @@ set noshowmode
 
 set number
 
-set laststatus=1
+set laststatus=2
 set ruler
 set showcmd
 set incsearch
@@ -35,10 +35,12 @@ set wildmenu
 set display=lastline,uhex
 set formatoptions+=j
 
+let g:netrw_browse_split=2
+
 try
-  colorscheme zaibatsu
+	colorscheme zaibatsu
 catch /^Vim\%((\a\+)\)\=:E185/
-  colorscheme koehler
+	colorscheme koehler
 endtry
 
 " CoC suggestions from https://github.com/neoclide/coc.nvim#example-vim-configuration
@@ -96,16 +98,16 @@ augroup end
 " END CoC
 
 if filereadable(findfile("~/.local.vimrc"))
-  source ~/.local.vimrc
+	source ~/.local.vimrc
 endif
 
 let s:local_vimrc = findfile(".local.vimrc", ".;")
 if filereadable(s:local_vimrc)
-  exec "source " . s:local_vimrc
+	exec "source " . s:local_vimrc
 endif
 
 if v:version >= 800
-  packloadall
+	packloadall
 endif
 
 silent! helptags ALL

@@ -16,3 +16,6 @@
 [submodule "dot_vim/pack/plugins/start/fugitive"]
 	path = dot_vim/pack/plugins/start/fugitive
 	url = https://tpope.io/vim/fugitive
+[submodule "dot_vim/pack/plugins/start/vim-airline"]
+	path = dot_vim/pack/plugins/start/vim-airline
+	url = https://github.com/vim-airline/vim-airline
