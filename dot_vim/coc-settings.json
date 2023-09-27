@@ -1,17 +1,43 @@
 {
+  "coc.preferences.formatOnSave": true,
+  "diagnostic-languageserver.filetypes": {
+    "sh": "shellcheck"
+  },
+  "floatFactory.floatConfig": {
+    "border": true
+  },
+  "go.goplsOptions": {
+    "gofumpt": true
+  },
   "languageserver": {
+    "golang": {
+      "command": "gopls",
+      "rootPatterns": ["go.mod", ".vim/", ".git/"],
+      "filetypes": ["go"],
+      "initializationOptions": {
+        "usePlaceholders": true
+      }
+    },
     "terraform": {
       "command": "terraform-ls",
-      "args": [
-        "serve"
-      ],
-      "filetypes": [
-        "terraform",
-        "tf"
-      ],
+      "args": ["serve"],
+      "filetypes": ["terraform", "tf"],
       "initializationOptions": {},
       "settings": {}
+    },
+    "ccls": {
+      "command": "ccls",
+      "filetypes": ["c", "cc", "cpp", "c++", "objc", "objcpp"],
+      "rootPatterns": [".ccls", "compile_commands.json", ".git/"],
+      "initializationOptions": {
+        "cache": {
+          "directory": "/tmp/ccls"
+        }
+      }
     }
   },
-  "coc.preferences.formatOnSave": true
+  "suggest.floatConfig": {
+    "border": true
+  },
+  "yaml.format.enable": true
 }

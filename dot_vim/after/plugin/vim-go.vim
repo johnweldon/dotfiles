@@ -1,5 +1,10 @@
 " thanks to: https://github.com/bhcleek/vim/blob/master/after/plugin/vim-go.vim
 
+augroup go-imports-on-save
+  autocmd!
+  autocmd BufWritePre *.go call CocAction('organizeImport')
+augroup END
+
 let g:go_fmt_command = 'gopls'
 let g:go_imports_mode = 'gopls'
 let g:go_def_mode = 'gopls'
