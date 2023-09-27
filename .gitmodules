@@ -13,3 +13,6 @@
 [submodule "dot_vim/pack/plugins/start/coc.nvim"]
 	path = dot_vim/pack/plugins/start/coc.nvim
 	url = gh:neoclide/coc.nvim
+[submodule "dot_vim/pack/plugins/start/fugitive"]
+	path = dot_vim/pack/plugins/start/fugitive
+	url = https://tpope.io/vim/fugitive
