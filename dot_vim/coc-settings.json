@@ -1,8 +1,6 @@
 {
   "coc.preferences.formatOnSave": true,
-  "diagnostic-languageserver.filetypes": {
-    "sh": "shellcheck"
-  },
+  "sh.enable": true,
   "floatFactory.floatConfig": {
     "border": true
   },
