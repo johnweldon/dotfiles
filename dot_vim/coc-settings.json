@@ -32,6 +32,11 @@
           "directory": "/tmp/ccls"
         }
       }
+    },
+    "dot": {
+      "command": "dot-language-server",
+      "args": ["--stdio"],
+      "filetypes": ["dot"]
     }
   },
   "suggest.floatConfig": {
