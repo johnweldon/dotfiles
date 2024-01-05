@@ -1,11 +1,15 @@
 #!/usr/bin/env bash
+#
+# Deprecated
+# See https://github.com/jw4/jot instead
+#
 
-NOTES_DIR="${NOTES_DIR:-${HOME}/shared/}"
+NOTES_DIR="${NOTES_DIR:-${HOME}/notes/}"
 EDITOR="${EDITOR:-vim}"
 
 DATE="$(date "+%Y-%m-%d")"
 
-JOT_FILE_NAME="$( realpath "${NOTES_DIR}" )/NOTES-${DATE}.md"
+JOT_FILE_NAME="$( realpath "${NOTES_DIR}" )/${DATE}.md"
 
 
 ${EDITOR} "${JOT_FILE_NAME}"
