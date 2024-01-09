@@ -3,8 +3,16 @@
 
 set -e
 
+BREW_CMD=""
+for pfx in "/opt/homebrew" "/usr/local"
+do
+  BREW_CMD="${pfx}/bin/brew"
+  [ -x "${BREW_CMD}" ] && break
+done
+
 for subcmd in update "upgrade --greedy" cleanup; do
   echo -e "\033[1;33mbrew ${subcmd}\033[0;39m"
-  "${HOMEBREW_PREFIX:-/usr/local}/bin/brew" ${subcmd}
+  # shellcheck disable=SC2086
+  "${BREW_CMD}" ${subcmd}
 done
 {{- end }}
