@@ -1,4 +1,3 @@
-
 [alias]
   b  = branch -vva
   br = branch -vv
@@ -6,11 +5,12 @@
   s  = status -s
   sm = submodule
 
-  l   = log -n 25 --graph --abbrev=3
-  la  = log --all --abbrev=3
-  lg  = log --graph --abbrev=3
-  lga = log --graph --all --abbrev=3
-  ll  = log --abbrev=3 --pretty=fuller
+  l   = log -n 25 --graph --abbrev=3 --pretty=reference
+  la  = log --all --abbrev=3 --pretty=reference
+  lg  = log --graph --abbrev=3 --pretty=reference
+  lga = log --graph --all --abbrev=3 --pretty=reference
+  ll  = log --abbrev=3 --pretty=medium
+  lc  = log --pretty=medium --show-signature
 
   ls  = ls-files
   lsc = diff --cached --name-only --diff-filter=ARMTC --relative
@@ -20,18 +20,20 @@
   un  = ls-files -o --exclude-standard
 
   d  = "!f() { git diff-index --quiet HEAD -- ; git diff --patch-with-stat; }; f"
-  dc = diff --cached --minimal --word-diff -w
+  dc = diff --cached --patch-with-stat -w
   dw = "!f() { git diff-index --quiet HEAD -- ; git diff --word-diff=color --patch-with-stat; }; f"
-  sh = "!f() { git show --pretty=fuller --minimal --word-diff -w ${1:-HEAD}; }; f"
+  sh = "!f() { git show --pretty=medium --minimal -w ${1:-HEAD}; }; f"
 
   f = "!f() { git fetch --all --tags --prune; }; f"
 
   amend        = commit --amend --reuse-message=HEAD
-  authors      = shortlog --summary --numbered
+  authors      = shortlog -senc
   branches     = branch -a
-  contributors = shortlog --summary --numbered
+  contributors = shortlog -senc
   ignored      = !git ls-files -v | grep "^[[:lower:]]"
   remotes      = remote -v
   tags         = tag -l
 
   push-all = "!f() { for remote in $(git remote); do git push $remote; done; }; f"
+
+# vi:se ai noet ts=4 sw=4 ft=gitconfig:

@@ -1,5 +1,6 @@
 {{- $name := "" -}}
 {{- $email := "" -}}
+{{- $gpg_key_id := "" -}}
 {{- $github := "" -}}
 {{- $tz := "" -}}
 {{- $org_roam_dir := "" -}}
@@ -7,6 +8,7 @@
 {{- with (index . "user") -}}
 {{-   with (index . "name") -}}{{- $name = . -}}{{- end -}}
 {{-   with (index . "email") -}}{{- $email = . -}}{{- end -}}
+{{-   with (index . "gpg_key_id") -}}{{- $gpg_key_id = . -}}{{- end -}}
 {{-   with (index . "github") -}}{{- $github = . -}}{{- end -}}
 {{-   with (index . "tz") -}}{{- $tz = . -}}{{- end -}}
 {{-   with (index . "org_roam_dir") -}}{{- $org_roam_dir = . -}}{{- end -}}
@@ -44,6 +46,7 @@
   [data.user]
     name = {{ $name | quote }}
     email = {{ $email | quote }}
+    gpg_key_id = {{ $gpg_key_id | quote }}
     github = {{ $github | quote }}
     tz = {{ $tz | quote }}
     org_roam_dir = {{ $org_roam_dir | quote }}

@@ -1,7 +1,11 @@
 {{- with (index . "user") -}}
 [user]
 	name = {{ .name | quote }}
-	email = {{ .email | quote }}
+	email = {{ .email | quote }}{{ with (index . "gpg_key_id") }}
+	signingkey = {{ . | quote }}
+
+[commit]
+	gpgsign = true{{ end }}
 
 {{ end -}}
 [core]
@@ -28,20 +32,16 @@
 [diff "pdf"]
 	textconv = pdftostdout
 
-[format]
-	pretty = %C(bold red)%h%Creset %C(white)%ad%Creset %Cgreen%aN%Creset %C(bold normal)%s%Creset %C(auto)%d%Creset
+[url "git@github.com:"]
+	insteadOf = https://github.com/
+	insteadOf = git://github.com/
+	insteadOf = gh:
 
 [http]
 	cookiefile = {{ .chezmoi.homeDir }}/.gitcookies
-
-[log]
-	abbrevCommit = true
-	date = relative
-	decorate = auto
 
 [include]
 	path = .git.aliases
 	path = .local.gitconfig
 
-# vi:set noet ci pi sts=0 sw=2 ts=2:
-
+# vi:se ai noet ts=4 sw=4 ft=gitconfig:
