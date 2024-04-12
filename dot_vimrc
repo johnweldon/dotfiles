@@ -35,7 +35,7 @@ set wildmenu
 set display=lastline,uhex
 set formatoptions+=j
 
-let g:netrw_browse_split=1
+let g:netrw_browse_split=0
 
 try
 	colorscheme zaibatsu
