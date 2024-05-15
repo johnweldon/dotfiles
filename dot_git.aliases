@@ -5,10 +5,10 @@
   s  = status -s
   sm = submodule
 
-  l   = log -n 25 --graph --abbrev=3 --pretty=reference
-  la  = log --all --abbrev=3 --pretty=reference
-  lg  = log --graph --abbrev=3 --pretty=reference
-  lga = log --graph --all --abbrev=3 --pretty=reference
+  l   = log -n 25 --graph --abbrev=3
+  la  = log --all --abbrev=3
+  lg  = log --graph --abbrev=3
+  lga = log --graph --all --abbrev=3
   ll  = log --abbrev=3 --pretty=medium
   lc  = log --pretty=medium --show-signature
 
