@@ -8,6 +8,7 @@ x11vnc \
   -logfile "{{ .chezmoi.homeDir }}/.vnc/%VNCDISPLAY.log" \
   -rc "{{ .chezmoi.homeDir }}/.vnc/.x11vncrc" \
   -allow 10.36. \
+  -allow 100. \
   -listen 0.0.0.0 \
   -bg 
 
