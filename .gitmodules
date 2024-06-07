@@ -19,3 +19,6 @@
 [submodule "dot_vim/pack/plugins/start/vim-airline"]
 	path = dot_vim/pack/plugins/start/vim-airline
 	url = https://github.com/vim-airline/vim-airline
+[submodule "dot_config/nvim/pack/nvim/start/nvim-lspconfig"]
+	path = dot_config/nvim/pack/nvim/start/nvim-lspconfig
+	url = https://github.com/neovim/nvim-lspconfig
