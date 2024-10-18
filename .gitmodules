@@ -1,21 +1,28 @@
 [submodule "dot_vim/pack/plugins/start/sensible"]
 	path = dot_vim/pack/plugins/start/sensible
 	url = https://tpope.io/vim/sensible.git
+	branch = master
 [submodule "dot_vim/pack/plugins/start/vim-go"]
 	path = dot_vim/pack/plugins/start/vim-go
 	url = https://github.com/fatih/vim-go.git
+	branch = master
 [submodule "dot_vim/pack/plugins/start/vim-terraform"]
 	path = dot_vim/pack/plugins/start/vim-terraform
 	url = https://github.com/hashivim/vim-terraform.git
+	branch = master
 [submodule "dot_vim/pack/plugins/start/editorconfig-vim"]
 	path = dot_vim/pack/plugins/start/editorconfig-vim
 	url = https://github.com/editorconfig/editorconfig-vim.git
+	branch = master
 [submodule "dot_vim/pack/plugins/start/coc.nvim"]
 	path = dot_vim/pack/plugins/start/coc.nvim
 	url = https://github.com/neoclide/coc.nvim
+	branch = release
 [submodule "dot_vim/pack/plugins/start/fugitive"]
 	path = dot_vim/pack/plugins/start/fugitive
 	url = https://tpope.io/vim/fugitive
+	branch = master
 [submodule "dot_vim/pack/plugins/start/vim-airline"]
 	path = dot_vim/pack/plugins/start/vim-airline
 	url = https://github.com/vim-airline/vim-airline
+	branch = master

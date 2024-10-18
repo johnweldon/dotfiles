@@ -34,16 +34,19 @@
 
 (package-install 'company)
 (package-install 'company-go)
+;;(package-install 'company-mode)
 (package-install 'evil)
 (package-install 'go-mode)
 (package-install 'kubernetes)
 (package-install 'kubernetes-evil)
 (package-install 'lsp-mode)
+(package-install 'lsp-ui)
 (package-install 'org-roam)
 (package-install 'package)
 (package-install 'typescript-mode)
 (package-install 'use-package)
 (package-install 'yaml-mode)
+(package-install 'yasnippet)
 
 (require 'use-package)
 
@@ -101,6 +104,12 @@
 (require 'go-mode)
 
 (add-to-list 'auto-mode-alist '("\\.go\\'" . go-mode))
+
+(add-hook 'go-mode-hook #'lsp-deferred)
+(defun lsp-go-install-save-hooks ()
+  (add-hook 'before-save-hook #'lsp-format-buffer t t)
+  (add-hook 'before-save-hook #'lsp-organize-imports t t))
+(add-hook 'go-mode-hook #'lsp-go-install-save-hooks)
 
 
 ;; Typescript
