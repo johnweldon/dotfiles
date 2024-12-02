@@ -79,6 +79,11 @@ export VISUAL=vi
   export VISUAL=vim
 }
 
+(command -v nvim > /dev/null 2>&1) && {
+  export EDITOR=nvim
+  export VISUAL=nvim
+}
+
 (command -v direnv > /dev/null 2>&1) && eval "$(direnv hook bash)"
 
 {{ with (index . "user") }}{{ with (index . "tz") }}

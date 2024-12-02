@@ -1,2 +1,4 @@
-vim.cmd("setlocal textwidth=80")
-vim.cmd("setlocal colorcolumn=80")
+vim.cmd([[
+  setlocal textwidth=80
+  setlocal colorcolumn=80
+]])
