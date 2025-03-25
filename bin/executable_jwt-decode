@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+#
+# Credit: https://fabianlee.org/2023/08/27/bash-decoding-a-jwt-from-the-command-line-with-jq/
+#
+
+set -eou pipefail
+
+function decode {
+  jq -rR 'select(. != "null") | split(".") | .[0],.[1] | @base64d | fromjson'
+}
+
+if [[ $# -gt 0 ]]; then
+  for arg in "$@"; do
+    echo "${arg}" | decode
+  done
+else
+  decode <&0
+fi
