@@ -24,7 +24,8 @@
   dw = "!f() { git diff-index --quiet HEAD -- ; git diff --word-diff=color --patch-with-stat; }; f"
   sh = "!f() { git show --pretty=medium --minimal -w ${1:-HEAD}; }; f"
 
-  f = "!f() { git fetch --all --tags --prune; }; f"
+  f = "!f() { git fetch --tags --prune; }; f"
+  fa = "!f() { git fetch --all --tags; }; f"
 
   amend        = commit --amend --reuse-message=HEAD
   authors      = shortlog -senc
