@@ -1,44 +1,34 @@
-require("string")
-
---[[]x]
-local function dump(o, i)
-  if type(o) == "table" then
-    if i == nil or i < 1 then
-      i = 1
-    end
-
-    local indent = "  "
-    local prefix = string.rep(indent, i)
-    local finalprefix = string.rep(indent, i - 1)
-
-    local s = "{\n"
-    for k, v in pairs(o) do
-      if type(k) ~= "number" then
-        k = '"' .. k .. '"'
-      end
-      s = s .. prefix .. k .. ": " .. dump(v, i + 1) .. ",\n"
-    end
-
-    return s .. finalprefix .. "}"
-  else
-    return tostring(o)
-  end
-end
---[[]]
+require("lib")
 
 return {
   "saghen/blink.cmp",
+  dependencies = { "ribru17/blink-cmp-spell" },
   opts = function(_, opts)
-    --[[
-     default sources:
-      1: lsp,
-      2: path,
-      3: snippets,
-      4: buffer,
-      5: lazydev,
-      6: dadbod,
-    ]]
-    opts.sources.per_filetype = { markdown = { "lsp", "path", "snippets", "lazydev", "dadbod" } }
+    --print(DebugDump(opts.sources))
+    opts.sources.providers["spell"] = {
+      name = "Spell",
+      module = "blink-cmp-spell",
+      opts = {},
+    }
+
+    -- default sources:
+    --  1: lsp,
+    --  2: path,
+    --  3: snippets,
+    --  4: buffer,
+    --  5: lazydev,
+    --  6: dadbod,
+    opts.sources.per_filetype = { markdown = { "lsp", "path", "snippets", "lazydev", "dadbod", "spell" } }
     opts.sources.min_keyword_length = 4
+
+    local trigger = opts.completion.trigger or {}
+    trigger.show_on_keyword = true
+    opts.completion.trigger = trigger
+
+    opts.completion.menu.auto_show = false
+
+    local list = opts.completion.list or { selection = {} }
+    list.selection = { preselect = true, auto_insert = true }
+    opts.completion.list = list
   end,
 }
