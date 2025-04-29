@@ -1,7 +1,7 @@
 {{ if eq .chezmoi.os "windows" -}}
 if ($env:vsconsoleoutput)
-{ 
-  return 
+{
+  return
 }
 
 $DebugPreference = "SilentlyContinue"
@@ -11,12 +11,12 @@ Set-PSReadLineOption -EditMode Vi
 
 function Get-Identity
 {
-  return [Security.Principal.WindowsIdentity]::GetCurrent() 
+  return [Security.Principal.WindowsIdentity]::GetCurrent()
 }
 
 function Get-IsAdmin
-{ 
-  return ([Security.Principal.WindowsPrincipal] (Get-Identity)).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator") 
+{
+  return ([Security.Principal.WindowsPrincipal] (Get-Identity)).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")
 }
 
 function prompt
@@ -52,7 +52,7 @@ function Get-AllFiles
 
 function latr
 {
-  Get-AllFiles -reverse=$true 
+  Get-AllFiles -reverse=$true
 }
 
 Set-Alias -Name la -Value Get-AllFiles
