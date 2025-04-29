@@ -1,0 +1,61 @@
+{{ if eq .chezmoi.os "windows" -}}
+if ($env:vsconsoleoutput)
+{ 
+  return 
+}
+
+$DebugPreference = "SilentlyContinue"
+$VerbosePreference = "SilentlyContinue"
+
+Set-PSReadLineOption -EditMode Vi
+
+function Get-Identity
+{
+  return [Security.Principal.WindowsIdentity]::GetCurrent() 
+}
+
+function Get-IsAdmin
+{ 
+  return ([Security.Principal.WindowsPrincipal] (Get-Identity)).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator") 
+}
+
+function prompt
+{
+  if (Get-IsAdmin)
+  {
+    $Host.UI.RawUI.WindowTitle = [string]("(ADMIN) {0:yyyy-MM-dd HH:mm:ss} -- {1}" -f (Get-Date),(Get-Location).Path)
+    "{0} # " -f (Get-Location).Path
+  } else
+  {
+    $Host.UI.RawUI.WindowTitle = [string]("{0:yyyy-MM-dd HH:mm:ss} -- {1}" -f (Get-Date),(Get-Location).Path)
+    "{0} $ " -f (Get-Location).Path
+  }
+}
+
+Set-Alias -Name vim -Value nvim
+
+function Get-AllFiles
+{
+  param(
+    [string]$path=".",
+    [string]$sortproperty="LastWriteTime",
+    [bool]$reverse = $false
+  )
+  if ($reverse)
+  {
+    Get-ChildItem -Force $path | Sort-Object -Property $sortproperty -Descending
+  } else
+  {
+    Get-ChildItem -Force $path | Sort-Object -Property $sortproperty
+  }
+}
+
+function latr
+{
+  Get-AllFiles -reverse=$true 
+}
+
+Set-Alias -Name la -Value Get-AllFiles
+Set-Alias -Name ll -Value Get-AllFiles
+{{/* vi:se ft=ps1.templ: */}}
+{{- end -}}
