@@ -28,6 +28,10 @@ function execute_remote_command {
   local remote_hosts=("$@")
   local pids=()
 
+  local keychain_init="${HOME}/.keychain/${HOSTNAME}-sh"
+  # shellcheck disable=SC1090
+  [ -f "${keychain_init}" ] && source "${keychain_init}"
+
   echo "Executing: cmd on ${remote_hosts[*]}"
   for rhost in "${remote_hosts[@]}"; do
     {
