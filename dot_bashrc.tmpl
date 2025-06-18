@@ -84,8 +84,6 @@ export VISUAL=vi
   export VISUAL=nvim
 }
 
-(command -v direnv > /dev/null 2>&1) && eval "$(direnv hook bash)"
-
 {{ with (index . "user") }}{{ with (index . "tz") }}
 export TZ='{{ . }}'
 {{ end }}{{ end }}
@@ -121,3 +119,7 @@ function start_ssh_agent() {
 }
 
 [ ! -f "{{ .chezmoi.homeDir }}/.ssh/noagent" ] && start_ssh_agent || true
+
+# according to man page should be near end of bashrc
+(command -v direnv > /dev/null 2>&1) && eval "$(direnv hook bash)"
+
