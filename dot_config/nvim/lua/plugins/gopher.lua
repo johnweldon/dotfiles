@@ -1,4 +1,4 @@
-require("lib")
+-- require("lib")
 
 return {
   {
@@ -37,8 +37,7 @@ return {
       -- FieldAlignment
       opts.servers.gopls.settings.gopls.analyses.fieldalignment = false
 
-      -- Debug
-      -- print("final options lsp", DebugDump(opts))
+      -- DebugDump(opts)
     end,
   },
 }

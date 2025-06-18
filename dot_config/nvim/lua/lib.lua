@@ -1,17 +1,13 @@
-require("os")
-require("string")
+local M = {}
 
-function DebugDump(o, i)
+function M.debug_dump(o, i)
   local dbg = os.getenv("NVIM_DEBUG") or "false"
   if dbg == "false" then
-    return
+    return ""
   end
 
   if type(o) == "table" then
-    if i == nil or i < 1 then
-      i = 1
-    end
-
+    i = i or 1
     local indent = "  "
     local prefix = string.rep(indent, i)
     local finalprefix = string.rep(indent, i - 1)
@@ -21,21 +17,17 @@ function DebugDump(o, i)
       if type(k) ~= "number" then
         k = '"' .. k .. '"'
       end
-      s = s .. prefix .. k .. ": " .. DebugDump(v, i + 1) .. ",\n"
+      s = s .. prefix .. k .. ": " .. M.debug_dump(v, i + 1) .. ",\n"
     end
-
     return s .. finalprefix .. "}"
   else
     return tostring(o)
   end
 end
 
--- example disable autoformat per filetype, in a .nvim.lua file for example
-if false then
-  vim.api.nvim_create_autocmd({ "FileType" }, {
-    pattern = { "c", "cpp" },
-    callback = function()
-      vim.b.autoformat = false
-    end,
-  })
+-- Global function for backwards compatibility
+function DebugDump(o, i)
+  return M.debug_dump(o, i)
 end
+
+return M

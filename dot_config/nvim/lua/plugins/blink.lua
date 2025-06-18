@@ -1,4 +1,4 @@
-require("lib")
+-- require("lib")
 
 return {
   "saghen/blink.cmp",
