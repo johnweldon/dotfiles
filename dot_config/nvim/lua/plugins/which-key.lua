@@ -1,4 +1,5 @@
-require("lib")
+local lib = require("lib")
+local debug = lib.create_logger("which-key")
 
 return {
   "folke/which-key.nvim",
@@ -10,7 +11,7 @@ return {
   --   },
   -- },
   opts = function(_, opts)
-    -- print("which-key options", DebugDump(opts.icons))
+    debug.log("Initial options", opts.icons)
     -- copilot rules
     local copilotRule = { plugin = "copilot.lua", icon = "", color = "orange" }
     local existingIcons = opts.icons or {}
@@ -18,7 +19,8 @@ return {
     existingRules[#existingRules + 1] = copilotRule
     opts.icons = existingIcons
 
-    -- Debug
-    -- print("which-key final options", DebugDump(opts.icons))
+    debug.log("Final options", opts.icons)
+
+    return opts
   end,
 }
