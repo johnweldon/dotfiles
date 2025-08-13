@@ -16,6 +16,31 @@ return {
         },
       },
     },
+    sources = {
+      default = { "lsp", "path", "snippets", "buffer" },
+      providers = {
+        lsp = {
+          name = "LSP",
+          module = "blink.cmp.sources.lsp",
+          score_offset = 90,
+        },
+        path = {
+          name = "Path",
+          module = "blink.cmp.sources.path",
+          score_offset = 80,
+        },
+        snippets = {
+          name = "Snippets",
+          module = "blink.cmp.sources.snippets",
+          score_offset = 85,
+        },
+        buffer = {
+          name = "Buffer",
+          module = "blink.cmp.sources.buffer",
+          score_offset = 60,
+        },
+      },
+    },
     fuzzy = {
       sorts = {
         "exact",
