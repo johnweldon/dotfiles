@@ -1,8 +1,10 @@
 return {
   {
     "stevearc/conform.nvim",
-    default_format_opts = {
-      format = { timeout_ms = 6000 },
+    opts = {
+      default_format_opts = {
+        timeout_ms = 6000,
+      },
     },
   },
 }
