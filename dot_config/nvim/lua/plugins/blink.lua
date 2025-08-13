@@ -1,5 +1,3 @@
--- require("lib")
-
 return {
   "saghen/blink.cmp",
   opts = {
