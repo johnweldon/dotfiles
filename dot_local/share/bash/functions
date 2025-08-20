@@ -36,8 +36,8 @@ function execute_remote_command {
   for rhost in "${remote_hosts[@]}"; do
     {
       { ssh -A -q -t "${rhost}" "${remote_command}" 2>&1 1>&3 3>&- || echo "${rhost} connect error $?" |
-        awk -v pfx="${rhost}" '{printf "%15s :: ERROR %s\n", pfx, $0}'; } 3>&1 1>&2 |
-        awk -v pfx="${rhost}" '{printf "%15s ::       %s\n", pfx, $0}'
+        awk -v pfx="${rhost}" '{printf "%30s :: ERROR %s\n", pfx, $0}'; } 3>&1 1>&2 |
+        awk -v pfx="${rhost}" '{printf "%30s ::       %s\n", pfx, $0}'
     } &
     pids+=($!)
   done
