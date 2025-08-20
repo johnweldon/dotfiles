@@ -51,8 +51,8 @@ function execute_remote_command {
 #
 # Example
 #
-# hosts=($(get_srv_hostnames "_http._tcp.example.com"))
-# hosts=($(get_srv_hostnames -s "8.8.8.8" "_http._tcp.example.com"))
+# mapfile -t hosts < <(get_srv_hostnames "_http._tcp.example.com")
+# mapfile -t hosts < <(get_srv_hostnames -s "8.8.8.8" "_http._tcp.example.com")
 # execute_remote_command "uptime" "${hosts[@]}"
 
 function get_srv_hostnames {
@@ -82,6 +82,5 @@ function get_srv_hostnames {
   fi |
     awk '{print $4}' |
     sed 's/\.$//g' |
-    grep -v '^$' |
-    tr '\n' ' '
+    grep -v '^$'
 }
