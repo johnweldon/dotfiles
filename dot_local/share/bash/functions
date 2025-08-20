@@ -46,3 +46,42 @@ function execute_remote_command {
     wait "$pid"
   done
 }
+
+## Usage: get_srv_hostnames [-s dns_server] "service"
+#
+# Example
+#
+# hosts=($(get_srv_hostnames "_http._tcp.example.com"))
+# hosts=($(get_srv_hostnames -s "8.8.8.8" "_http._tcp.example.com"))
+# execute_remote_command "uptime" "${hosts[@]}"
+
+function get_srv_hostnames {
+  local dns_server=""
+  local service=""
+  local OPTIND
+
+  while getopts "s:" opt; do
+    case $opt in
+    s)
+      dns_server="$OPTARG"
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      return 1
+      ;;
+    esac
+  done
+  shift $((OPTIND - 1))
+
+  service="${1:?missing service}"
+
+  if [[ -n "$dns_server" ]]; then
+    dig +short SRV "@${dns_server}" "${service}"
+  else
+    dig +short SRV "${service}"
+  fi |
+    awk '{print $4}' |
+    sed 's/\.$//g' |
+    grep -v '^$' |
+    tr '\n' ' '
+}
