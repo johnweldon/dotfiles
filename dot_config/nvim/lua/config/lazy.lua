@@ -17,7 +17,18 @@ vim.opt.rtp:prepend(lazypath)
 require("lazy").setup({
   spec = {
     -- add LazyVim and import its plugins
-    { "LazyVim/LazyVim", import = "lazyvim.plugins" },
+    {
+      "LazyVim/LazyVim",
+      import = "lazyvim.plugins",
+      opts = {},
+      priority = 10000,
+      lazy = false,
+      config = true,
+    },
+    -- import any extras modules here
+    -- { import = "lazyvim.plugins.extras.lang.typescript" },
+    -- { import = "lazyvim.plugins.extras.lang.json" },
+    -- { import = "lazyvim.plugins.extras.ui.mini-animate" },
     -- import/override with your plugins
     { import = "plugins" },
   },
@@ -51,3 +62,23 @@ require("lazy").setup({
     },
   },
 })
+
+-- Manually setup LazyVim to ensure commands are available
+vim.schedule(function()
+  local ok, lazyvim = pcall(require, "lazyvim")
+  if ok then
+    lazyvim.setup({})
+
+    -- Manually create LazyExtras command if it doesn't exist
+    vim.schedule(function()
+      if vim.api.nvim_get_commands({})["LazyExtras"] == nil then
+        local extras_ok, extras = pcall(require, "lazyvim.util.extras")
+        if extras_ok then
+          vim.api.nvim_create_user_command("LazyExtras", function()
+            extras.show()
+          end, { desc = "Manage LazyVim extras" })
+        end
+      end
+    end)
+  end
+end)
