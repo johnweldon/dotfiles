@@ -83,27 +83,44 @@ function set_git_branch() {
   fi
 }
 
-function set_k8s_namespace() {
-  command kubectl config view --minify -o jsonpath="{.contexts[0].context.namespace}" 2>/dev/null
-}
+# Cache variables for kubectl context/namespace
+_K8S_CACHE_CONTEXT=""
+_K8S_CACHE_NAMESPACE=""
+_K8S_CACHE_TIME=0
+_K8S_CACHE_TTL=30  # Cache for 30 seconds
 
-function set_k8s_context() {
-  command kubectl config current-context 2>/dev/null
+function refresh_k8s_cache() {
+  if command -v kubectl > /dev/null 2>&1 ; then
+    _K8S_CACHE_CONTEXT=$(command kubectl config current-context 2>/dev/null)
+    _K8S_CACHE_NAMESPACE=$(command kubectl config view --minify -o jsonpath="{.contexts[0].context.namespace}" 2>/dev/null)
+    _K8S_CACHE_TIME=$(date +%s)
+  fi
 }
 
 function set_k8s_prompt () {
   if command -v kubectl > /dev/null 2>&1 ; then
-    CONTEXT=$(set_k8s_context)
-    NAMESPACE=$(set_k8s_namespace)
-    if [ -n "${NAMESPACE}" ] ; then
-      K8S="${LIGHT_GREEN}${CONTEXT}${WHITE}|${GREEN}${NAMESPACE}${COLOR_NONE} "
+    local current_time=$(date +%s)
+    local cache_age=$((current_time - _K8S_CACHE_TIME))
+
+    # Refresh cache if expired or never set
+    if [ $cache_age -gt $_K8S_CACHE_TTL ] || [ $_K8S_CACHE_TIME -eq 0 ]; then
+      refresh_k8s_cache
+    fi
+
+    if [ -n "${_K8S_CACHE_NAMESPACE}" ] ; then
+      K8S="${LIGHT_GREEN}${_K8S_CACHE_CONTEXT}${WHITE}|${GREEN}${_K8S_CACHE_NAMESPACE}${COLOR_NONE} "
+    elif [ -n "${_K8S_CACHE_CONTEXT}" ] ; then
+      K8S="${LIGHT_GREEN}${_K8S_CACHE_CONTEXT}${COLOR_NONE} "
     else
-      K8S="${LIGHT_GREEN}${CONTEXT}${COLOR_NONE} "
+      K8S=""
     fi
   else
     K8S=""
   fi
 }
+
+# Force refresh k8s cache (can be called manually if needed)
+alias k8s-refresh='refresh_k8s_cache && echo "Kubernetes context refreshed: ${_K8S_CACHE_CONTEXT}/${_K8S_CACHE_NAMESPACE}"'
 
 function set_shlvl_prompt() {
   if [ -n "${SSH_TTY}" ] ; then
