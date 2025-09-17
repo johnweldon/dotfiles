@@ -187,4 +187,9 @@ ${DATE_PROMPT}${PROMPT_SYMBOL} "
 }
 
 # Tell bash to execute this function just before displaying its prompt.
-PROMPT_COMMAND=set_bash_prompt
+# Include history sync if defined
+if [ -n "${_HISTORY_SYNC}" ]; then
+  PROMPT_COMMAND="${_HISTORY_SYNC}; set_bash_prompt"
+else
+  PROMPT_COMMAND="set_bash_prompt"
+fi
