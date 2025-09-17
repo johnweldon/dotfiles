@@ -106,26 +106,43 @@ export PAGER=less
 [ -f "${HOME}/.local.bashrc" ] && source "${HOME}/.local.bashrc"
 
 function start_ssh_agent() {
-  # shellcheck disable=SC1090,SC1091
-  (command -v ssh-agent >/dev/null 2>&1) && {
-    if command -v keychain >/dev/null 2>&1 ; then {
-      find "${HOME}/.ssh" -maxdepth 1 -name 'id_*' ! -name '*.pub' | xargs keychain -q
-      source "${HOME}/.keychain/${HOSTNAME}-sh"
-    }; else
-      {
-        [ -f "${HOME}/.ssh/agent.pid" ] && source "${HOME}/.ssh/agent.pid" >/dev/null 2>&1
-        if [ -z "${SSH_AGENT_PID}" ] || [ "$(ps -p "${SSH_AGENT_PID}" -o comm=)" != "ssh-agent" ]; then
-          echo "cleanup and restart ssh-agent"
-          [ -f "${HOME}/.ssh/agent.pid" ] && rm -f "${HOME}/.ssh/agent.pid"
-          ssh-agent >"${HOME}/.ssh/agent.pid"
-          source "${HOME}/.ssh/agent.pid"
-        fi
-      }
+  # Only start if ssh-agent is available
+  command -v ssh-agent >/dev/null 2>&1 || return 0
+
+  # Prefer keychain if available - it handles everything elegantly
+  if command -v keychain >/dev/null 2>&1; then
+    # Find all SSH keys (excluding public keys)
+    local ssh_keys
+    ssh_keys=$(find "${HOME}/.ssh" -maxdepth 1 -name 'id_*' ! -name '*.pub' 2>/dev/null)
+
+    if [ -n "${ssh_keys}" ]; then
+      # shellcheck disable=SC2086
+      keychain --quiet --agents ssh ${ssh_keys}
+      # shellcheck disable=SC1090,SC1091
+      [ -f "${HOME}/.keychain/${HOSTNAME}-sh" ] && source "${HOME}/.keychain/${HOSTNAME}-sh"
     fi
-  }
+    return 0
+  fi
+
+  # Fallback: Use ssh-agent directly with socket-based detection
+  local agent_socket="${SSH_AUTH_SOCK:-${XDG_RUNTIME_DIR:-/tmp}/ssh-agent-${USER}.sock}"
+
+  # Check if agent is already running and accessible
+  if [ -S "${agent_socket}" ] && ssh-add -l >/dev/null 2>&1; then
+    return 0  # Agent is running and accessible
+  fi
+
+  # Start new agent with persistent socket location
+  eval "$(ssh-agent -a "${agent_socket}" 2>/dev/null)"
+
+  # Add default keys if they exist
+  for key in "${HOME}/.ssh/id_"*; do
+    [ -f "${key}" ] && [ "${key%.pub}" = "${key}" ] && ssh-add "${key}" 2>/dev/null
+  done
 }
 
-[ ! -f "{{ .chezmoi.homeDir }}/.ssh/noagent" ] && start_ssh_agent || true
+# Start SSH agent unless explicitly disabled
+[ ! -f "{{ .chezmoi.homeDir }}/.ssh/noagent" ] && start_ssh_agent
 
 # according to man page should be near end of bashrc
 (command -v direnv > /dev/null 2>&1) && eval "$(direnv hook bash)"
