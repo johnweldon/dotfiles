@@ -47,18 +47,25 @@ function execute_remote_command {
     reset="\033[0m"
   fi
 
+  # Calculate maximum hostname length for alignment
+  local max_width=0
+  for rhost in "${remote_hosts[@]}"; do
+    local len=${#rhost}
+    [[ $len -gt $max_width ]] && max_width=$len
+  done
+
   echo "Executing: cmd on ${remote_hosts[*]}"
   for rhost in "${remote_hosts[@]}"; do
     {
       ssh -A -T -q "${rhost}" "${remote_command}" \
-        2> >(awk -v pfx="${rhost}" -v dw="${dim_white}" -v dr="${dim_red}" -v rs="${reset}" \
-          '{printf "%s%30s%s %sXX %s%s\n", dw, pfx, rs, dr, $0, rs}' >&2) ||
+        2> >(awk -v pfx="${rhost}" -v width="${max_width}" -v dw="${dim_white}" -v dr="${dim_red}" -v rs="${reset}" \
+          '{printf "%s%*s%s %sXX %s%s\n", dw, width, pfx, rs, dr, $0, rs}' >&2) ||
         echo "${rhost} connect error $?" |
-        awk -v pfx="${rhost}" -v dw="${dim_white}" -v dr="${dim_red}" -v rs="${reset}" \
-          '{printf "%s%30s%s %sXX %s%s\n", dw, pfx, rs, dr, $0, rs}' >&2
+        awk -v pfx="${rhost}" -v width="${max_width}" -v dw="${dim_white}" -v dr="${dim_red}" -v rs="${reset}" \
+          '{printf "%s%*s%s %sXX %s%s\n", dw, width, pfx, rs, dr, $0, rs}' >&2
     } |
-      awk -v pfx="${rhost}" -v dw="${dim_white}" -v g="${green}" -v rs="${reset}" \
-        '{printf "%s%30s%s %s::%s %s\n", dw, pfx, rs, g, rs, $0}' &
+      awk -v pfx="${rhost}" -v width="${max_width}" -v dw="${dim_white}" -v g="${green}" -v rs="${reset}" \
+        '{printf "%s%*s%s %s::%s %s\n", dw, width, pfx, rs, g, rs, $0}' &
     pids+=($!)
   done
 
