@@ -12,7 +12,7 @@ return {
       list = {
         selection = {
           preselect = false,
-          auto_insert = true,
+          auto_insert = false,
         },
       },
     },
@@ -33,6 +33,10 @@ return {
           name = "Snippets",
           module = "blink.cmp.sources.snippets",
           score_offset = 85,
+          opts = {
+            friendly_snippets = true,
+            search_paths = { vim.fn.stdpath("config") .. "/snippets" },
+          },
         },
         buffer = {
           name = "Buffer",
@@ -63,8 +67,9 @@ return {
     },
     keymap = {
       preset = "default",
-      ["<Tab>"] = { "select_next", "fallback" },
-      ["<S-Tab>"] = { "select_prev", "fallback" },
+      ["<CR>"] = { "accept", "fallback" },
+      ["<Tab>"] = { "select_next", "snippet_forward", "fallback" },
+      ["<S-Tab>"] = { "select_prev", "snippet_backward", "fallback" },
     },
   },
 }
