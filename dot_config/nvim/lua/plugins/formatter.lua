@@ -7,6 +7,14 @@ return {
       },
       formatters_by_ft = {
         go = { "goimports", "gofumpt" },
+        markdown = { "prettier", "unescape_globs" },
+      },
+      formatters = {
+        unescape_globs = {
+          command = "sed",
+          args = { "-E", "s/\\\\\\*/*/g" },
+          stdin = true,
+        },
       },
     },
   },
