@@ -35,6 +35,16 @@ command set -o noclobber
 # make less more friendly for non-text input files, see lesspipe(1)
 [ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
 
+# Load bash functions from XDG-compliant location
+if [ -f ~/.local/share/bash/functions ]; then
+  # shellcheck disable=SC1090,SC1091
+  . ~/.local/share/bash/functions
+elif [ -f ~/.bash_functions ]; then
+  # Fallback to old location
+  # shellcheck disable=SC1090,SC1091
+  . ~/.bash_functions
+fi
+
 # Alias definitions.
 # You may want to put all your additions into a separate file like
 # ~/.bash_aliases, instead of adding them here directly.
@@ -103,7 +113,7 @@ export LESS='-FeX2Rgmwz-2'
 export PAGER=less
 
 # shellcheck disable=SC1090
-[ -f "${HOME}/.local.bashrc" ] && source "${HOME}/.local.bashrc"
+[ -f "{{ .chezmoi.homeDir }}/.local.bashrc" ] && source "{{ .chezmoi.homeDir }}/.local.bashrc"
 
 function start_ssh_agent() {
   # Only start if ssh-agent is available
@@ -113,13 +123,13 @@ function start_ssh_agent() {
   if command -v keychain >/dev/null 2>&1; then
     # Find all SSH keys (excluding public keys)
     local ssh_keys
-    ssh_keys=$(find "${HOME}/.ssh" -maxdepth 1 -name 'id_*' ! -name '*.pub' 2>/dev/null)
+    ssh_keys=$(find "{{ .chezmoi.homeDir }}/.ssh" -maxdepth 1 -name 'id_*' ! -name '*.pub' 2>/dev/null)
 
     if [ -n "${ssh_keys}" ]; then
       # shellcheck disable=SC2086
       keychain --quiet --agents ssh ${ssh_keys}
       # shellcheck disable=SC1090,SC1091
-      [ -f "${HOME}/.keychain/${HOSTNAME}-sh" ] && source "${HOME}/.keychain/${HOSTNAME}-sh"
+      [ -f "{{ .chezmoi.homeDir }}/.keychain/${HOSTNAME}-sh" ] && source "{{ .chezmoi.homeDir }}/.keychain/${HOSTNAME}-sh"
     fi
     return 0
   fi
@@ -136,7 +146,7 @@ function start_ssh_agent() {
   eval "$(ssh-agent -a "${agent_socket}" 2>/dev/null)"
 
   # Add default keys if they exist
-  for key in "${HOME}/.ssh/id_"*; do
+  for key in "{{ .chezmoi.homeDir }}/.ssh/id_"*; do
     [ -f "${key}" ] && [ "${key%.pub}" = "${key}" ] && ssh-add "${key}" 2>/dev/null
   done
 }

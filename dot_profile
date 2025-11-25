@@ -1,4 +1,13 @@
-[ -d "/usr/local/go/bin" ] && PATH="/usr/local/go/bin:${PATH}"
-[ -d "${HOME}/go/bin" ] && PATH="${HOME}/go/bin:${PATH}"
-[ -d "${HOME}/bin" ] && PATH="${HOME}/bin:${PATH}"
-[ -d "${HOME}/.local/bin" ] && PATH="${HOME}/.local/bin:${PATH}"
+# Load bash functions if available
+[ -f "${HOME}/.local/share/bash/functions" ] && . "${HOME}/.local/share/bash/functions"
+
+# Setup PATH using the function if available, otherwise fallback to simple approach
+if type -t setup_path > /dev/null 2>&1; then
+    setup_path
+else
+    # Fallback: add directories manually
+    [ -d "/usr/local/go/bin" ] && PATH="/usr/local/go/bin:${PATH}"
+    [ -d "${HOME}/go/bin" ] && PATH="${HOME}/go/bin:${PATH}"
+    [ -d "${HOME}/bin" ] && PATH="${HOME}/bin:${PATH}"
+    [ -d "${HOME}/.local/bin" ] && PATH="${HOME}/.local/bin:${PATH}"
+fi

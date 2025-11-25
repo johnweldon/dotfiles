@@ -84,3 +84,140 @@ function get_srv_hostnames {
     sed 's/\.$//g' |
     grep -v '^$'
 }
+
+## PATH Management Functions
+
+# cleanpath - Remove duplicates and non-existent directories from PATH-like variables
+# Usage: cleanpath [path] [separator]
+#   path: The PATH string to clean (default: $PATH)
+#   separator: Path separator (default: :)
+cleanpath() {
+    local input_path="${1:-$PATH}"
+    local separator="${2:-:}"
+    local -a clean_paths=()
+    local -A seen=()
+    local IFS="$separator"
+
+    # Split the path into array
+    read -ra path_parts <<< "$input_path"
+
+    # Process each path component
+    for part in "${path_parts[@]}"; do
+        # Skip empty parts
+        [[ -z "$part" ]] && continue
+
+        # Normalize the path (remove trailing slashes, resolve . and ..)
+        local normalized
+        if [[ -d "$part" ]]; then
+            normalized=$(cd "$part" 2>/dev/null && pwd) || normalized="$part"
+        else
+            normalized="$part"
+        fi
+
+        # Skip if:
+        # - Already seen (duplicate)
+        # - Not an absolute path
+        # - Directory doesn't exist (for absolute paths)
+        if [[ -n "${seen[$normalized]}" ]]; then
+            continue
+        fi
+
+        if [[ "$normalized" != /* ]]; then
+            continue
+        fi
+
+        if [[ ! -d "$normalized" ]]; then
+            continue
+        fi
+
+        # Mark as seen and add to clean paths
+        seen["$normalized"]=1
+        clean_paths+=("$normalized")
+    done
+
+    # Join the array back into a string
+    (IFS="$separator"; echo "${clean_paths[*]}")
+}
+
+# addpath - Add a directory to PATH if it exists and isn't already there
+# Usage: addpath directory [position]
+#   directory: The directory to add
+#   position: "start" or "end" (default: end)
+addpath() {
+    local dir="$1"
+    local position="${2:-end}"
+
+    # Check if directory exists
+    [[ ! -d "$dir" ]] && return 1
+
+    # Get absolute path
+    dir=$(cd "$dir" && pwd)
+
+    # Check if already in PATH
+    case ":$PATH:" in
+        *":$dir:"*) return 0 ;;
+    esac
+
+    # Add to PATH
+    if [[ "$position" == "start" ]]; then
+        PATH="$dir:$PATH"
+    else
+        PATH="$PATH:$dir"
+    fi
+
+    export PATH
+}
+
+# rmpath - Remove a directory from PATH
+# Usage: rmpath directory
+rmpath() {
+    local dir="$1"
+    local new_path=""
+    local IFS=':'
+
+    # Get absolute path if directory exists
+    [[ -d "$dir" ]] && dir=$(cd "$dir" && pwd)
+
+    read -ra path_parts <<< "$PATH"
+    for part in "${path_parts[@]}"; do
+        [[ "$part" != "$dir" ]] && new_path="${new_path:+$new_path:}$part"
+    done
+
+    PATH="$new_path"
+    export PATH
+}
+
+# setup_path - Initialize PATH with standard directories
+# Usage: setup_path [base_path]
+#   base_path: Starting PATH (default: current $PATH or system defaults)
+setup_path() {
+    local base_path="${1:-$PATH}"
+
+    # If PATH is empty or very minimal, provide sensible defaults
+    if [[ -z "$base_path" ]] || [[ "$base_path" == "/usr/bin:/bin" ]]; then
+        base_path="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    fi
+
+    # Add common development paths if they exist (in reverse order for prepending)
+    local -a dev_paths=(
+        "${HOME}/bin"
+        "${HOME}/.local/bin"
+        "${HOME}/.cargo/bin"
+        "${HOME}/go/bin"
+        "/usr/local/go/bin"
+    )
+
+    for dir in "${dev_paths[@]}"; do
+        if [[ -d "$dir" ]]; then
+            # Only add if not already in PATH
+            case ":$base_path:" in
+                *":$dir:"*) ;;
+                *) base_path="${dir}:${base_path}" ;;
+            esac
+        fi
+    done
+
+    # Clean and export
+    PATH=$(cleanpath "$base_path" ':')
+    export PATH
+}

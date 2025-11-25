@@ -6,7 +6,11 @@
 # shellcheck disable=SC1090,SC1091
 [ -f "${HOME}/.bashrc" ] && . "${HOME}/.bashrc"
 
-if command -v cleanpath > /dev/null 2>&1 ; then
+# Clean PATH using bash function if available, otherwise try executable
+if type -t cleanpath > /dev/null 2>&1 ; then
+  PATH=$(cleanpath "${PATH}" ':')
+  export PATH
+elif command -v cleanpath > /dev/null 2>&1 ; then
   PATH=$(cleanpath -separator ':' "${PATH}")
   export PATH
 fi
