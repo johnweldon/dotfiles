@@ -7,9 +7,18 @@ return {
       },
       formatters_by_ft = {
         go = { "goimports", "gofumpt" },
-        markdown = { "prettier", "unescape_globs" },
+        markdown = { "prettier_markdown", "unescape_globs" },
       },
       formatters = {
+        prettier_markdown = {
+          command = "prettier",
+          args = {
+            "--prose-wrap",
+            "preserve",
+            "--parser",
+            "markdown",
+          },
+        },
         unescape_globs = {
           command = "sed",
           args = { "-E", "s/\\\\\\*/*/g" },
