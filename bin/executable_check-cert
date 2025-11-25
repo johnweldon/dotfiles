@@ -1,18 +1,17 @@
 #!/usr/bin/env bash
-
-set -e
+set -euo pipefail
 
 opt=""
 case "$(openssl version)" in
-  Libre*)
-    opt=""
-    ;;
-  OpenSSL*)
-    opt="-ext subjectAltName"
-    ;;
-  *)
-    opt="-purpose"
-    ;;
+Libre*)
+  opt=""
+  ;;
+OpenSSL*)
+  opt="-ext subjectAltName"
+  ;;
+*)
+  opt="-purpose"
+  ;;
 esac
 
 for p in "$@"; do
@@ -29,7 +28,7 @@ for p in "$@"; do
 
   # Check cert
   # shellcheck disable=SC2086
-  echo | \
-    openssl s_client -servername "${host}" -connect "${host}:${port}" 2> /dev/null | \
+  echo |
+    openssl s_client -servername "${host}" -connect "${host}:${port}" 2>/dev/null |
     openssl x509 -noout -issuer -subject -fingerprint -dates -email ${opt}
 done

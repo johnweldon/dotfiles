@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 #
 # Deprecated
 # See https://github.com/jw4/jot instead
@@ -9,7 +10,6 @@ EDITOR="${EDITOR:-vim}"
 
 DATE="$(date "+%Y-%m-%d")"
 
-JOT_FILE_NAME="$( realpath "${NOTES_DIR}" )/${DATE}.md"
-
+JOT_FILE_NAME="$(realpath "${NOTES_DIR}")/${DATE}.md"
 
 ${EDITOR} "${JOT_FILE_NAME}"

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC1054,SC1083,SC1009,SC1073,SC1065,SC1064,SC1072 # Contains Go template syntax
 # If not running interactively, don't do anything
 case $- in
   *i*) ;;
@@ -106,13 +107,21 @@ function start_ssh_agent() {
       source "${HOME}/.keychain/${HOSTNAME}-sh"
     }; else
       {
+        # Use flock to prevent race conditions when multiple shells start simultaneously
+        local lockfile="${HOME}/.ssh/agent.lock"
+        (
+          flock -n 200 || exit 0  # Non-blocking lock; exit if another process holds it
+
+          [ -f "${HOME}/.ssh/agent.pid" ] && source "${HOME}/.ssh/agent.pid" >/dev/null 2>&1
+          if [ -z "${SSH_AGENT_PID}" ] || ! ps -p "${SSH_AGENT_PID}" >/dev/null 2>&1; then
+            echo "cleanup and restart ssh-agent"
+            [ -f "${HOME}/.ssh/agent.pid" ] && rm -f "${HOME}/.ssh/agent.pid"
+            ssh-agent >"${HOME}/.ssh/agent.pid"
+          fi
+        ) 200>"${lockfile}"
+
+        # Source the agent file outside the lock
         [ -f "${HOME}/.ssh/agent.pid" ] && source "${HOME}/.ssh/agent.pid" >/dev/null 2>&1
-        if [ -z "${SSH_AGENT_PID}" ] || [ "$(ps -p "${SSH_AGENT_PID}" -o comm=)" != "ssh-agent" ]; then
-          echo "cleanup and restart ssh-agent"
-          [ -f "${HOME}/.ssh/agent.pid" ] && rm -f "${HOME}/.ssh/agent.pid"
-          ssh-agent >"${HOME}/.ssh/agent.pid"
-          source "${HOME}/.ssh/agent.pid"
-        fi
       }
     fi
   }

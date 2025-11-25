@@ -1,7 +1,7 @@
 {{ if eq .chezmoi.os "darwin" -}}
 #!/usr/bin/env bash
-
-set -e
+# shellcheck disable=SC1054,SC1083 # Contains Go template syntax
+set -euo pipefail
 
 BREW_CMD=""
 for pfx in "/opt/homebrew" "/usr/local"

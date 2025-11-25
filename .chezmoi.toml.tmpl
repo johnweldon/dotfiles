@@ -38,7 +38,7 @@
 {{- end -}}
 
 {{- if (eq $tz "") -}}
-{{-   $tz = "America/Phoenix" -}}
+{{-   $tz = promptString "Timezone (e.g., America/Phoenix, America/New_York)" -}}
 {{- end -}}
 
 [data]
@@ -57,5 +57,5 @@
       {{ . | quote }},{{ end }}
     {{ end }}]
 
-    config = """
-{{ $config }}"""
+    config = '''
+{{ $config }}'''
