@@ -143,30 +143,36 @@ function set_date_prompt() {
 }
 
 # Set the full bash prompt.
-function set_bash_prompt() {
-  # Set the PROMPT_SYMBOL variable. We do this first so we don't lose the
-  # return value of the last command.
-  set_prompt_symbol $?
+if command -v bashline >/dev/null 2>&1; then
+  set_bash_prompt() {
+    PS1='$(bashline --exit-code=$? --shlvl=$SHLVL --jobs=\j)'
+  }
+else
+  set_bash_prompt() {
+    # Set the PROMPT_SYMBOL variable. We do this first so we don't lose the
+    # return value of the last command.
+    set_prompt_symbol $?
 
-  # Set the PYTHON_VIRTUALENV variable.
-  set_virtualenv
+    # Set the PYTHON_VIRTUALENV variable.
+    set_virtualenv
 
-  # Set the BRANCH variable.
-  set_git_branch
+    # Set the BRANCH variable.
+    set_git_branch
 
-  # set k8s prompt
-  set_k8s_prompt
+    # set k8s prompt
+    set_k8s_prompt
 
-  # set date string
-  set_date_prompt
+    # set date string
+    set_date_prompt
 
-  USERLINE="${CYAN}\u@${LIGHT_CYAN}\h${COLOR_NONE}:${LIGHT_YELLOW}\w${COLOR_NONE} "
+    USERLINE="${CYAN}\u@${LIGHT_CYAN}\h${COLOR_NONE}:${LIGHT_YELLOW}\w${COLOR_NONE} "
 
-  # Set the bash prompt variable.
-  PS1="
+    # Set the bash prompt variable.
+    PS1="
 ${PYTHON_VIRTUALENV}${USERLINE}${BRANCH}${K8S}
 ${DATE_PROMPT}${PROMPT_SYMBOL} "
-}
+  }
+fi
 
 # Tell bash to execute this function just before displaying its prompt.
 PROMPT_COMMAND=set_bash_prompt
