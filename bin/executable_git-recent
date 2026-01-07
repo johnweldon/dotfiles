@@ -9,11 +9,19 @@ BEGIN { RS = "\1" ; FS = "\t" }
            subj=$3
             sha=$4;
            head=$5;
-           type=$6;
 
-             st=index(refname, "/")
             ln2=split(subj, subja, "\n");
         subject=substr(subja[1],1, 72);
+
+        if (substr(refname, 1, 13) == "refs/remotes/") {
+            rest=substr(refname, 14);
+            st=index(rest, "/");
+            remote=substr(rest, 1, st-1);
+            branch=substr(rest, st+1);
+        } else {
+            remote=" -- ";
+            branch=substr(refname, 12);
+        }
 
           reset="\033[0m";
 
@@ -38,14 +46,10 @@ BEGIN { RS = "\1" ; FS = "\t" }
 
          fmtstr=lightred "%15s" cyan "%s" lightgreen "%-25s" lightcyan " %15s" yellow " %s" reset " %s\n";
 
-        if ( st ) {
-            printf fmtstr, substr(refname, 0, st-1), head, substr(refname, st+1), date, sha, subject;
-        } else {
-            printf fmtstr, " -- ",                   head, refname,               date, sha, subject;
-        }
+        printf fmtstr, remote, head, branch, date, sha, subject;
 }
 EOF
 
-FOR_EACH_FORMAT="%(committerdate:relative)%09%(refname:short)%09%(subject)%09%(objectname:short)%09%(HEAD)%09%(objecttype)%01"
+FOR_EACH_FORMAT="%(committerdate:relative)%09%(refname)%09%(subject)%09%(objectname:short)%09%(HEAD)%01"
 
 git for-each-ref --sort=committerdate --format=$FOR_EACH_FORMAT refs/heads refs/remotes | tr -d '\r\n' | awk "$AWK"
