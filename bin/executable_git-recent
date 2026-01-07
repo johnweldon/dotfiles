@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-read -r -d '' AWK <<EOF
+read -r -d '' AWK <<'EOF' || true
 BEGIN { RS = "\1" ; FS = "\t" }
 {
-           date=\$1;
-        refname=\$2;
-           subj=\$3
-            sha=\$4;
-           head=\$5;
-           type=\$6;
+           date=$1;
+        refname=$2;
+           subj=$3
+            sha=$4;
+           head=$5;
+           type=$6;
 
              st=index(refname, "/")
             ln2=split(subj, subja, "\n");
