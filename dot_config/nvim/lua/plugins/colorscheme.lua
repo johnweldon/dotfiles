@@ -73,12 +73,4 @@ return {
       },
     },
   },
-
-  -- Set default colorscheme
-  {
-    "LazyVim/LazyVim",
-    opts = {
-      colorscheme = "tokyonight",
-    },
-  },
 }

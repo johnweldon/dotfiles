@@ -1,3 +1,38 @@
+-- Terminal detection for colorscheme
+local function is_16color_terminal()
+  local term_prog = os.getenv("TERM_PROGRAM") or os.getenv("LC_TERMINAL")
+  if term_prog == "Apple_Terminal" then
+    return true
+  end
+  local term = os.getenv("TERM") or ""
+  local colorterm = os.getenv("COLORTERM") or ""
+  -- If COLORTERM indicates truecolor/24bit, it's not 16-color
+  if colorterm == "truecolor" or colorterm == "24bit" then
+    return false
+  end
+  -- If TERM doesn't contain 256color or truecolor, assume 16-color
+  if not term:match("256color") and not term:match("truecolor") and not term:match("24bit") then
+    return true
+  end
+  return false
+end
+
+local function get_colorscheme()
+  if is_16color_terminal() then
+    vim.opt.termguicolors = false
+    vim.api.nvim_create_autocmd("ColorScheme", {
+      pattern = "industry",
+      callback = function()
+        vim.api.nvim_set_hl(0, "CursorLine", {})
+        vim.api.nvim_set_hl(0, "CursorLineNr", { ctermfg = 11, ctermbg = 0 })
+        vim.api.nvim_set_hl(0, "LineNr", { ctermfg = 7, ctermbg = "NONE" })
+      end,
+    })
+    return "industry"
+  end
+  return "tokyonight"
+end
+
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
   local lazyrepo = "https://github.com/folke/lazy.nvim.git"
@@ -20,7 +55,9 @@ require("lazy").setup({
     {
       "LazyVim/LazyVim",
       import = "lazyvim.plugins",
-      opts = {},
+      opts = {
+        colorscheme = get_colorscheme(),
+      },
       priority = 10000,
       lazy = false,
       config = true,
@@ -63,13 +100,14 @@ require("lazy").setup({
   },
 })
 
--- Manually setup LazyVim to ensure commands are available
+-- Setup LazyVim and create LazyExtras command
 vim.schedule(function()
   local ok, lazyvim = pcall(require, "lazyvim")
   if ok then
-    lazyvim.setup({})
+    lazyvim.setup({
+      colorscheme = get_colorscheme(),
+    })
 
-    -- Manually create LazyExtras command if it doesn't exist
     vim.schedule(function()
       if vim.api.nvim_get_commands({})["LazyExtras"] == nil then
         local extras_ok, extras = pcall(require, "lazyvim.util.extras")
