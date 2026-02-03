@@ -1,35 +1,25 @@
--- Terminal detection for colorscheme
-local function is_16color_terminal()
-  local term_prog = os.getenv("TERM_PROGRAM") or os.getenv("LC_TERMINAL")
-  if term_prog == "Apple_Terminal" then
-    return true
-  end
-  local term = os.getenv("TERM") or ""
-  local colorterm = os.getenv("COLORTERM") or ""
-  -- If COLORTERM indicates truecolor/24bit, it's not 16-color
-  if colorterm == "truecolor" or colorterm == "24bit" then
-    return false
-  end
-  -- If TERM doesn't contain 256color or truecolor, assume 16-color
-  if not term:match("256color") and not term:match("truecolor") and not term:match("24bit") then
-    return true
-  end
-  return false
-end
+local lib = require("lib")
+
+local colorscheme_16color = "industry"
+local cterm = lib.cterm
 
 local function get_colorscheme()
-  if is_16color_terminal() then
+  if lib.is_16color_terminal() then
     vim.opt.termguicolors = false
+    vim.opt.statusline = " %f %m%r%h %= %y %l:%c %p%% "
     vim.api.nvim_create_autocmd("ColorScheme", {
-      pattern = "industry",
+      pattern = colorscheme_16color,
       callback = function()
+        vim.api.nvim_set_hl(0, "Comment", { ctermfg = cterm.green })
         vim.api.nvim_set_hl(0, "CursorLine", {})
-        vim.api.nvim_set_hl(0, "CursorLineNr", { ctermfg = 11, ctermbg = 0 })
-        vim.api.nvim_set_hl(0, "LineNr", { ctermfg = 7, ctermbg = "NONE" })
+        vim.api.nvim_set_hl(0, "CursorLineNr", { ctermfg = cterm.bright_yellow })
+        vim.api.nvim_set_hl(0, "LineNr", { ctermfg = cterm.white })
+        vim.api.nvim_set_hl(0, "Title", { ctermfg = cterm.cyan })
       end,
     })
-    return "industry"
+    return colorscheme_16color
   end
+
   return "tokyonight"
 end
 
