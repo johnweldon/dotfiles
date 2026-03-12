@@ -8,6 +8,7 @@ local function get_colorscheme()
     vim.opt.termguicolors = false
     vim.opt.statusline = " %f %m%r%h %= %y %l:%c %p%% "
     vim.api.nvim_create_autocmd("ColorScheme", {
+      group = vim.api.nvim_create_augroup("custom_16color_hl", { clear = true }),
       pattern = colorscheme_16color,
       callback = function()
         vim.api.nvim_set_hl(0, "Comment", { ctermfg = cterm.green })
@@ -89,24 +90,3 @@ require("lazy").setup({
     },
   },
 })
-
--- Setup LazyVim and create LazyExtras command
-vim.schedule(function()
-  local ok, lazyvim = pcall(require, "lazyvim")
-  if ok then
-    lazyvim.setup({
-      colorscheme = get_colorscheme(),
-    })
-
-    vim.schedule(function()
-      if vim.api.nvim_get_commands({})["LazyExtras"] == nil then
-        local extras_ok, extras = pcall(require, "lazyvim.util.extras")
-        if extras_ok then
-          vim.api.nvim_create_user_command("LazyExtras", function()
-            extras.show()
-          end, { desc = "Manage LazyVim extras" })
-        end
-      end
-    end)
-  end
-end)

@@ -60,11 +60,6 @@ function M.debug_log(plugin_name, message, data)
 end
 
 function M.debug_dump(o, i)
-  local dbg = os.getenv("NVIM_DEBUG") or "false"
-  if dbg == "false" then
-    return ""
-  end
-
   if type(o) == "table" then
     i = i or 1
     local indent = "  "
@@ -86,6 +81,9 @@ end
 
 -- Global function for backwards compatibility
 function DebugDump(o, i)
+  if not M.is_debug_enabled() then
+    return ""
+  end
   return M.debug_dump(o, i)
 end
 

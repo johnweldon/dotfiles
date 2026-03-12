@@ -1,26 +1,6 @@
 -- Fix for Java LSP dynamic capability registration errors
 return {
   {
-    "LazyVim/LazyVim",
-    config = function()
-      -- Override the problematic register_capability handler in LazyVim
-      local original_register_capability = vim.lsp.handlers["client/registerCapability"]
-
-      vim.lsp.handlers["client/registerCapability"] = function(err, result, ctx, config)
-        -- Check if result.registrations exists and is a table before calling original handler
-        if result and result.registrations and type(result.registrations) == "table" then
-          if original_register_capability then
-            return original_register_capability(err, result, ctx, config)
-          else
-            return vim.lsp.handlers._default["client/registerCapability"](err, result, ctx, config)
-          end
-        end
-        -- Silently ignore malformed registration requests
-        return nil
-      end
-    end,
-  },
-  {
     "neovim/nvim-lspconfig",
     opts = {
       servers = {
@@ -35,6 +15,22 @@ return {
         },
       },
     },
+    init = function()
+      local original_register_capability = vim.lsp.handlers["client/registerCapability"]
+
+      vim.lsp.handlers["client/registerCapability"] = function(err, result, ctx, config)
+        local client = vim.lsp.get_client_by_id(ctx.client_id)
+        if client and client.name ~= "jdtls" then
+          local handler = original_register_capability or vim.lsp.handlers._default["client/registerCapability"]
+          return handler(err, result, ctx, config)
+        end
+        -- jdtls: only forward well-formed registration requests
+        if result and result.registrations and type(result.registrations) == "table" then
+          local handler = original_register_capability or vim.lsp.handlers._default["client/registerCapability"]
+          return handler(err, result, ctx, config)
+        end
+        return nil
+      end
+    end,
   },
 }
-
