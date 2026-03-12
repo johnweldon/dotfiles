@@ -33,9 +33,6 @@ return {
         jq = {
           args = { "--indent", "2", "." },
         },
-        shfmt = {
-          prepend_args = { "-i", "2" },
-        },
         unescape_globs = {
           command = "sed",
           args = { "-E", "s/\\\\\\*/*/g" },
