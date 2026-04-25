@@ -19,7 +19,6 @@ import shlex
 import subprocess
 import sys
 
-
 ignored_dirs = os.getenv("GIT_ALL_IGNORE", "").split(":")
 ignored_dirs = list(
     filter(None, ["node_modules", ".terraform", "dist", ".git", ".idea"] + ignored_dirs)
@@ -51,7 +50,7 @@ def all_git_dirs(action: str, start_dir: str = ".") -> None:
         - Failed commands print warnings but don't stop execution
         - Directories in ignored_dirs list are not traversed for performance
     """
-    for root, dirs, files in os.walk(start_dir):
+    for root, dirs, _ in os.walk(start_dir):
         # Check if this is a git repository before filtering
         if ".git" in dirs:
             cmd = f"bash -lc '( cd {shlex.quote(root)}; {action} )'"
@@ -62,7 +61,7 @@ def all_git_dirs(action: str, start_dir: str = ".") -> None:
                         f"Warning: Command failed in {root} with exit code {result.returncode}",
                         file=sys.stderr,
                     )
-            except Exception as e:
+            except (OSError, subprocess.SubprocessError) as e:
                 print(f"Error running command in {root}: {e}", file=sys.stderr)
 
         # Remove ignored directories from dirs to prevent descending into them

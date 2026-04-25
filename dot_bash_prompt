@@ -40,138 +40,130 @@ LIGHT_WHITE="\[\033[1;37m\]"
 COLOR_NONE="\[\e[0m\]"
 
 function swatch() {
-  echo "black${BLACK}black${COLOR_NONE}"
-  echo "light black${LIGHT_BLACK}light black${COLOR_NONE}"
-  echo "red${RED}red${COLOR_NONE}"
-  echo "light red${LIGHT_RED}light red${COLOR_NONE}"
-  echo "green${GREEN}green${COLOR_NONE}"
-  echo "light green${LIGHT_GREEN}light green${COLOR_NONE}"
-  echo "yellow${YELLOW}yellow${COLOR_NONE}"
-  echo "light yellow${LIGHT_YELLOW}light yellow${COLOR_NONE}"
-  echo "blue${BLUE}blue${COLOR_NONE}"
-  echo "light blue${LIGHT_BLUE}light blue${COLOR_NONE}"
-  echo "purple${PURPLE}purple${COLOR_NONE}"
-  echo "light purple${LIGHT_PURPLE}light purple${COLOR_NONE}"
-  echo "cyan${CYAN}cyan${COLOR_NONE}"
-  echo "light cyan${LIGHT_CYAN}light cyan${COLOR_NONE}"
-  echo "white${WHITE}white${COLOR_NONE}"
-  echo "light white${LIGHT_WHITE}light white${COLOR_NONE}"
+	echo "black${BLACK}black${COLOR_NONE}"
+	echo "light black${LIGHT_BLACK}light black${COLOR_NONE}"
+	echo "red${RED}red${COLOR_NONE}"
+	echo "light red${LIGHT_RED}light red${COLOR_NONE}"
+	echo "green${GREEN}green${COLOR_NONE}"
+	echo "light green${LIGHT_GREEN}light green${COLOR_NONE}"
+	echo "yellow${YELLOW}yellow${COLOR_NONE}"
+	echo "light yellow${LIGHT_YELLOW}light yellow${COLOR_NONE}"
+	echo "blue${BLUE}blue${COLOR_NONE}"
+	echo "light blue${LIGHT_BLUE}light blue${COLOR_NONE}"
+	echo "purple${PURPLE}purple${COLOR_NONE}"
+	echo "light purple${LIGHT_PURPLE}light purple${COLOR_NONE}"
+	echo "cyan${CYAN}cyan${COLOR_NONE}"
+	echo "light cyan${LIGHT_CYAN}light cyan${COLOR_NONE}"
+	echo "white${WHITE}white${COLOR_NONE}"
+	echo "light white${LIGHT_WHITE}light white${COLOR_NONE}"
 }
 
 # determine git branch name
 function parse_git_branch() {
-  command git branch 2>/dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1)/'
+	command git branch 2>/dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1)/'
 }
 
 function parse_git_dirty() {
-  if test -n "$(git status --porcelain)"; then
-    echo -n " *"
-  fi
+	if ! git diff --quiet --ignore-submodules HEAD 2>/dev/null ||
+		! git diff --cached --quiet --ignore-submodules HEAD 2>/dev/null; then
+		echo -n " *"
+	fi
 }
 
 # Determine the branch/state information for this git repository.
 function set_git_branch() {
-  if (command -v git && command git rev-parse --git-dir) >/dev/null 2>&1; then
-    # Get the name of the branch.
-    branch=$(parse_git_branch)
-    dirty=$(parse_git_dirty)
+	if (command -v git && command git rev-parse --git-dir) >/dev/null 2>&1; then
+		# Get the name of the branch.
+		branch=$(parse_git_branch)
+		dirty=$(parse_git_dirty)
 
-    # Set the final branch string.
-    BRANCH="${RED}${branch}${LIGHT_RED}${dirty}${COLOR_NONE} "
-  else
-    BRANCH=""
-  fi
+		# Set the final branch string.
+		BRANCH="${RED}${branch}${LIGHT_RED}${dirty}${COLOR_NONE} "
+	else
+		BRANCH=""
+	fi
 }
 
 function set_k8s_namespace() {
-  command kubectl config view --minify -o jsonpath="{.contexts[0].context.namespace}" 2>/dev/null
+	command kubectl config view --minify -o jsonpath="{.contexts[0].context.namespace}" 2>/dev/null
 }
 
 function set_k8s_context() {
-  command kubectl config current-context 2>/dev/null
+	command kubectl config current-context 2>/dev/null
 }
 
 function set_k8s_prompt() {
-  if command -v kubectl >/dev/null 2>&1; then
-    CONTEXT=$(set_k8s_context)
-    NAMESPACE=$(set_k8s_namespace)
-    if [ -n "${NAMESPACE}" ]; then
-      K8S="${LIGHT_GREEN}${CONTEXT}${WHITE}|${GREEN}${NAMESPACE}${COLOR_NONE} "
-    else
-      K8S="${LIGHT_GREEN}${CONTEXT}${COLOR_NONE} "
-    fi
-  else
-    K8S=""
-  fi
-}
-
-function set_shlvl_prompt() {
-  if [ -n "${SSH_TTY}" ]; then
-    SSH_SESSION="${YELLOW}-ssh-${COLOR_NONE} "
-  else
-    SSH_SESSION=""
-  fi
-  SHLVL_PROMPT="${SSH_SESSION} ${LIGHT_CYAN}(${SHLVL})${COLOR_NONE}"
+	if command -v kubectl >/dev/null 2>&1; then
+		CONTEXT=$(set_k8s_context)
+		NAMESPACE=$(set_k8s_namespace)
+		if [ -n "${NAMESPACE}" ]; then
+			K8S="${LIGHT_GREEN}${CONTEXT}${WHITE}|${GREEN}${NAMESPACE}${COLOR_NONE} "
+		else
+			K8S="${LIGHT_GREEN}${CONTEXT}${COLOR_NONE} "
+		fi
+	else
+		K8S=""
+	fi
 }
 
 # Return the prompt symbol to use, colorized based on the return value of the
 # previous command.
 function set_prompt_symbol() {
-  if test "$(id -u)" -eq 0; then
-    SYM="#"
-  else
-    SYM="\$"
-  fi
-  if test "$1" -eq 0; then
-    PROMPT_SYMBOL="${SYM}"
-  else
-    PROMPT_SYMBOL="${LIGHT_RED}$1 ${SYM}${COLOR_NONE}"
-  fi
+	if test "$(id -u)" -eq 0; then
+		SYM="#"
+	else
+		SYM="\$"
+	fi
+	if test "$1" -eq 0; then
+		PROMPT_SYMBOL="${SYM}"
+	else
+		PROMPT_SYMBOL="${LIGHT_RED}$1 ${SYM}${COLOR_NONE}"
+	fi
 }
 
 # Determine active Python virtualenv details.
 function set_virtualenv() {
-  if test -z "$VIRTUAL_ENV"; then
-    PYTHON_VIRTUALENV=""
-  else
-    PYTHON_VIRTUALENV="${LIGHT_WHITE}[$(basename "$VIRTUAL_ENV")]${COLOR_NONE} "
-  fi
+	if test -z "$VIRTUAL_ENV"; then
+		PYTHON_VIRTUALENV=""
+	else
+		PYTHON_VIRTUALENV="${LIGHT_WHITE}[$(basename "$VIRTUAL_ENV")]${COLOR_NONE} "
+	fi
 }
 
 function set_date_prompt() {
-  DATE_PROMPT="${WHITE}$(date +'%H:%M:%S')${COLOR_NONE} "
+	DATE_PROMPT="${WHITE}$(date +'%H:%M:%S')${COLOR_NONE} "
 }
 
 # Set the full bash prompt.
 if command -v bashline >/dev/null 2>&1; then
-  set_bash_prompt() {
-    PS1='$(bashline --exit-code=$? --shlvl=$SHLVL --jobs=\j)'
-  }
+	set_bash_prompt() {
+		PS1='$(bashline --exit-code=$? --shlvl=$SHLVL --jobs=\j)'
+	}
 else
-  set_bash_prompt() {
-    # Set the PROMPT_SYMBOL variable. We do this first so we don't lose the
-    # return value of the last command.
-    set_prompt_symbol $?
+	set_bash_prompt() {
+		# Set the PROMPT_SYMBOL variable. We do this first so we don't lose the
+		# return value of the last command.
+		set_prompt_symbol $?
 
-    # Set the PYTHON_VIRTUALENV variable.
-    set_virtualenv
+		# Set the PYTHON_VIRTUALENV variable.
+		set_virtualenv
 
-    # Set the BRANCH variable.
-    set_git_branch
+		# Set the BRANCH variable.
+		set_git_branch
 
-    # set k8s prompt
-    set_k8s_prompt
+		# set k8s prompt
+		set_k8s_prompt
 
-    # set date string
-    set_date_prompt
+		# set date string
+		set_date_prompt
 
-    USERLINE="${CYAN}\u@${LIGHT_CYAN}\h${COLOR_NONE}:${LIGHT_YELLOW}\w${COLOR_NONE} "
+		USERLINE="${CYAN}\u@${LIGHT_CYAN}\h${COLOR_NONE}:${LIGHT_YELLOW}\w${COLOR_NONE} "
 
-    # Set the bash prompt variable.
-    PS1="
+		# Set the bash prompt variable.
+		PS1="
 ${PYTHON_VIRTUALENV}${USERLINE}${BRANCH}${K8S}
 ${DATE_PROMPT}${PROMPT_SYMBOL} "
-  }
+	}
 fi
 
 # Tell bash to execute this function just before displaying its prompt.

@@ -17,11 +17,19 @@ def clean(messy, sep):
     return sep.join(cleaned)
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Clean PATH like strings')
-    parser.add_argument('paths', metavar='<pathvar>', type=str, nargs='*', help='PATH values',
-                        default=os.getenv('PATH', ''))
-    parser.add_argument('-separator', metavar='<sep>', type=str, help='path separator char', default=':')
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Clean PATH like strings")
+    parser.add_argument(
+        "paths",
+        metavar="<pathvar>",
+        type=str,
+        nargs="*",
+        help="PATH values",
+        default=os.getenv("PATH", ""),
+    )
+    parser.add_argument(
+        "-separator", metavar="<sep>", type=str, help="path separator char", default=":"
+    )
     args = parser.parse_args()
 
     paths = args.paths

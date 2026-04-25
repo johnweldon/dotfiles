@@ -5,8 +5,11 @@
 
 # ls Aliases
 
-alias ls='\ls -CFG'
-(command ls --help 2>&1 | grep -q -- --color) && alias ls='\ls --color=auto -F'
+if command ls --help 2>&1 | grep -q -- --color; then
+	alias ls='\ls --color=auto -F'
+else
+	alias ls='\ls -CFG'
+fi
 
 alias la='ls -a'
 alias ll='ls -l'

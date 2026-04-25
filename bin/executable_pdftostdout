@@ -1,2 +1,3 @@
 #!/usr/bin/env bash
-pdftotext "$1" -
+set -euo pipefail
+pdftotext "${1:?usage: pdftostdout <file>}" -

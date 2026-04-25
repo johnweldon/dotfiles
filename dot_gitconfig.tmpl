@@ -4,6 +4,9 @@
 	email = {{ .email | quote }}{{ with (index . "gpg_key_id") }}
 	signingkey = {{ . | quote }}
 
+[gpg]
+	format = ssh
+
 [commit]
 	gpgsign = true{{ end }}
 

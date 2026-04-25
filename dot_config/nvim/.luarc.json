@@ -1,0 +1,9 @@
+{
+  "Lua.diagnostics.globals": [
+    "vim"
+  ],
+  "Lua.workspace.library": [
+    "${VIMRUNTIME}/lua",
+    "${VIMRUNTIME}/share/nvim/runtime/lua"
+  ]
+}
