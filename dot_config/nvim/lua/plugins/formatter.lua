@@ -11,7 +11,13 @@ return {
         go = { "goimports", "gofumpt" },
         json = { "jq" },
         lua = { "stylua" },
-        markdown = { "prettier_markdown", "unescape_globs" },
+        markdown = function(bufnr)
+          local path = vim.api.nvim_buf_get_name(bufnr)
+          if path:match("/notes/log/") then
+            return {}
+          end
+          return { "prettier_markdown", "unescape_globs" }
+        end,
         python = { "black", "ruff_fix" },
         rust = { "rustfmt" },
         sh = { "shfmt" },
