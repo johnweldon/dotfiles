@@ -1,11 +1,17 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC1054,SC1083,SC1009,SC1073,SC1065,SC1064,SC1072 # Contains Go template syntax
+# PATH and environment (shared with login and non-interactive shells).
+# Kept above the interactive guard: bash sources ~/.bashrc (not $BASH_ENV)
+# for an sshd-spawned non-interactive command, so one-shot `ssh host cmd`
+# only picks this up if it runs before the guard returns.
+# shellcheck disable=SC1090,SC1091
+[ -f "${HOME}/.bash_env" ] && . "${HOME}/.bash_env"
+
 # If not running interactively, don't do anything
 case $- in
-  *i*) ;;
-    *) return;;
+*i*) ;;
+*) return ;;
 esac
-
 
 # don't put duplicate lines or lines starting with space in the history.
 # See bash(1) for more options
@@ -15,16 +21,16 @@ HISTCONTROL=ignoreboth
 shopt -s histappend
 
 # for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
-HISTSIZE=1000
-HISTFILESIZE=2000
+HISTSIZE=10000
+HISTFILESIZE=20000
 
 # check the window size after each command and, if necessary,
 # update the values of LINES and COLUMNS.
 shopt -s checkwinsize
 
-command set -o vi
-command set -o ignoreeof
-command set -o noclobber
+set -o vi
+set -o ignoreeof
+set -o noclobber
 
 # make less more friendly for non-text input files, see lesspipe(1)
 [ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
@@ -52,7 +58,7 @@ if ! shopt -oq posix; then
 fi
 
 {{ if eq .chezmoi.os "darwin" -}}
-(command -v brew > /dev/null ) && {
+(command -v brew >/dev/null) && {
   HOMEBREW_PREFIX="$(brew --prefix)"
   if [[ -r "${HOMEBREW_PREFIX}/etc/profile.d/bash_completion.sh" ]]; then
     # shellcheck disable=SC1091
@@ -72,37 +78,13 @@ if [ -f ~/.bash_prompt ]; then
   . ~/.bash_prompt
 fi
 
-export EDITOR=vi
-export VISUAL=vi
-
-(command -v vim > /dev/null 2>&1) && {
-  export EDITOR=vim
-  export VISUAL=vim
-}
-
-(command -v nvim > /dev/null 2>&1) && {
-  export EDITOR=nvim
-  export VISUAL=nvim
-}
-
-{{ with (index . "user") }}{{ with (index . "tz") }}
-export TZ='{{ . }}'
-{{ end }}{{ end }}
-
-export LC_ALL="en_US.UTF-8"
-export LANG="en_US.UTF-8"
-
-export LESSCHARSET='UTF-8'
-export LESS='-FeX2Rgmwz-2'
-export PAGER=less
-
 # shellcheck disable=SC1090
 [ -f "${HOME}/.local.bashrc" ] && source "${HOME}/.local.bashrc"
 
 function start_ssh_agent() {
   # shellcheck disable=SC1090,SC1091
   (command -v ssh-agent >/dev/null 2>&1) && {
-    if command -v keychain >/dev/null 2>&1 ; then {
+    if command -v keychain >/dev/null 2>&1; then {
       find "${HOME}/.ssh" -maxdepth 1 -name 'id_*' ! -name '*.pub' | xargs keychain -q
       source "${HOME}/.keychain/${HOSTNAME}-sh"
     }; else
@@ -110,11 +92,11 @@ function start_ssh_agent() {
         # Use flock to prevent race conditions when multiple shells start simultaneously
         local lockfile="${HOME}/.ssh/agent.lock"
         (
-          flock -n 200 || exit 0  # Non-blocking lock; exit if another process holds it
+          flock -n 200 || exit 0 # Non-blocking lock; exit if another process holds it
 
           [ -f "${HOME}/.ssh/agent.pid" ] && source "${HOME}/.ssh/agent.pid" >/dev/null 2>&1
           if [ -z "${SSH_AGENT_PID}" ] || ! ps -p "${SSH_AGENT_PID}" >/dev/null 2>&1; then
-            echo "cleanup and restart ssh-agent"
+            echo "cleanup and restart ssh-agent" >&2
             [ -f "${HOME}/.ssh/agent.pid" ] && rm -f "${HOME}/.ssh/agent.pid"
             ssh-agent >"${HOME}/.ssh/agent.pid"
           fi
@@ -130,5 +112,4 @@ function start_ssh_agent() {
 [ ! -f "{{ .chezmoi.homeDir }}/.ssh/noagent" ] && start_ssh_agent || true
 
 # according to man page should be near end of bashrc
-(command -v direnv > /dev/null 2>&1) && eval "$(direnv hook bash)"
-
+(command -v direnv >/dev/null 2>&1) && eval "$(direnv hook bash)"

@@ -1,7 +1,6 @@
 require("config.lazy")
 
 vim.opt.autowriteall = true
-vim.opt.exrc = true
 
 -- Source local configuration if it exists (not managed by chezmoi)
 local local_config = vim.fn.stdpath("config") .. "/.local.lua"

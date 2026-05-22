@@ -1,0 +1,40 @@
+# shellcheck disable=SC1054,SC1083,SC1009,SC1073,SC1065,SC1064,SC1072 # Contains Go template syntax
+# ~/.bash_env - single source of truth for PATH and environment.
+# Sourced by ~/.profile (login shells) and ~/.bashrc (interactive shells,
+# and sshd-spawned one-shot `ssh host cmd` -- bash routes those through
+# ~/.bashrc, so the source line there sits above the interactive guard).
+# Keep POSIX-sh compatible, idempotent, and silent (no output).
+
+_prepend_path() {
+  case ":${PATH}:" in
+    *:"$1":*) ;;
+    *) [ -d "$1" ] && PATH="$1:${PATH}" ;;
+  esac
+}
+_prepend_path "/usr/local/go/bin"
+_prepend_path "${HOME}/go/bin"
+_prepend_path "${HOME}/bin"
+_prepend_path "${HOME}/.local/bin"
+unset -f _prepend_path
+export PATH
+
+# uv-managed PATH additions
+# shellcheck disable=SC1090,SC1091
+[ -f "${HOME}/.local/bin/env" ] && . "${HOME}/.local/bin/env"
+
+export LC_ALL="en_US.UTF-8"
+export LANG="en_US.UTF-8"
+export LESSCHARSET='UTF-8'
+export LESS='-FeX2Rgmwz-2'
+export PAGER=less
+{{ with (index . "user") }}{{ with (index . "tz") }}export TZ='{{ . }}'
+{{ end }}{{ end }}
+export EDITOR=vi VISUAL=vi
+command -v vim  > /dev/null 2>&1 && { EDITOR=vim;  VISUAL=vim; }
+command -v nvim > /dev/null 2>&1 && { EDITOR=nvim; VISUAL=nvim; }
+export EDITOR VISUAL
+
+# machine-local env overrides (not chezmoi-managed; keep at mode 0600 -- it may
+# hold secrets). Sourced last so it can override anything above.
+# shellcheck disable=SC1090,SC1091
+[ -f "${HOME}/.local.bash_env" ] && . "${HOME}/.local.bash_env"

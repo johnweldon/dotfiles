@@ -1,4 +1,2 @@
-[ -d "/usr/local/go/bin" ] && PATH="/usr/local/go/bin:${PATH}"
-[ -d "${HOME}/go/bin" ] && PATH="${HOME}/go/bin:${PATH}"
-[ -d "${HOME}/bin" ] && PATH="${HOME}/bin:${PATH}"
-[ -d "${HOME}/.local/bin" ] && PATH="${HOME}/.local/bin:${PATH}"
+# shellcheck disable=SC1090,SC1091
+[ -f "${HOME}/.bash_env" ] && . "${HOME}/.bash_env"

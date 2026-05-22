@@ -1,5 +1,4 @@
 {{ with (index . "ssh") }}{{ with (index . "config") }}{{.}}{{ end }}{{ end }}
 
 Host *
-  Protocol 2
   ForwardAgent no

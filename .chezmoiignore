@@ -3,4 +3,3 @@ Documents
 {{ end -}}
 CLAUDE.md
 .claude
-dot_config/nvim/.luarc.json
