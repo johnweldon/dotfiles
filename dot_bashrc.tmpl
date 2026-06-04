@@ -85,14 +85,18 @@ function start_ssh_agent() {
   # shellcheck disable=SC1090,SC1091
   (command -v ssh-agent >/dev/null 2>&1) && {
     if command -v keychain >/dev/null 2>&1; then {
-      find "${HOME}/.ssh" -maxdepth 1 -name 'id_*' ! -name '*.pub' | xargs keychain -q
+      find "${HOME}/.ssh" -maxdepth 1 -name 'id_*' ! -name '*.pub' -print0 | xargs -0 keychain -q
       source "${HOME}/.keychain/${HOSTNAME}-sh"
     }; else
       {
         # Use flock to prevent race conditions when multiple shells start simultaneously
         local lockfile="${HOME}/.ssh/agent.lock"
         (
-          flock -n 200 || exit 0 # Non-blocking lock; exit if another process holds it
+          # Skip locking where flock is unavailable (e.g. macOS without
+          # util-linux); the agent still starts, just without race protection.
+          if command -v flock >/dev/null 2>&1; then
+            flock -n 200 || exit 0
+          fi
 
           [ -f "${HOME}/.ssh/agent.pid" ] && source "${HOME}/.ssh/agent.pid" >/dev/null 2>&1
           if [ -z "${SSH_AGENT_PID}" ] || ! ps -p "${SSH_AGENT_PID}" >/dev/null 2>&1; then

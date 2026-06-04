@@ -69,7 +69,10 @@ function set_git_branch() {
   }
   while IFS= read -r line; do
     case $line in
-    "# branch.head "*) branch=${line#"# branch.head "} ;;
+    "# branch.head "*)
+      branch=${line#"# branch.head "}
+      [ "$branch" = "(detached)" ] && branch="detached"
+      ;;
     "#"*) ;;
     ?*) dirty=" *" ;;
     esac

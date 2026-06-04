@@ -2,7 +2,6 @@
 
 import git_helpers
 
-
 command = """
 pwd
 git status --short --branch --show-stash

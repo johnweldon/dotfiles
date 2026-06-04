@@ -48,11 +48,6 @@ return {
           module = "blink.cmp.sources.cmdline",
           score_offset = 70,
         },
-        omni = {
-          name = "Omni",
-          module = "blink.cmp.sources.complete_func",
-          score_offset = 75,
-        },
       },
     },
     cmdline = {

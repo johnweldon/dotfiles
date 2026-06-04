@@ -7,13 +7,13 @@
 set -euo pipefail
 
 function decode {
-	jq -rR 'select(. != "null") | split(".") | .[0],.[1] | @base64d | fromjson'
+  jq -rR 'select(. != "null") | split(".") | .[0],.[1] | @base64d | fromjson'
 }
 
 if [[ $# -gt 0 ]]; then
-	for arg in "$@"; do
-		echo "${arg}" | decode
-	done
+  for arg in "$@"; do
+    echo "${arg}" | decode
+  done
 else
-	decode <&0
+  decode
 fi

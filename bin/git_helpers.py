@@ -15,7 +15,6 @@ Example:
 """
 
 import os
-import shlex
 import subprocess
 import sys
 
@@ -53,9 +52,9 @@ def all_git_dirs(action: str, start_dir: str = ".") -> None:
     for root, dirs, _ in os.walk(start_dir):
         # Check if this is a git repository before filtering
         if ".git" in dirs:
-            cmd = f"bash -lc '( cd {shlex.quote(root)}; {action} )'"
+            cmd = ["bash", "-lc", action]
             try:
-                result = subprocess.run(cmd, shell=True, check=False)
+                result = subprocess.run(cmd, cwd=root, check=False)
                 if result.returncode != 0:
                     print(
                         f"Warning: Command failed in {root} with exit code {result.returncode}",

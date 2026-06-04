@@ -18,8 +18,12 @@
 [init]
 	defaultBranch = main
 
+[tag]
+	sort = version:refname
+
 [fetch]
 	fsckobjects = true
+	writeCommitGraph = true
 
 [pull]
 	ff = only

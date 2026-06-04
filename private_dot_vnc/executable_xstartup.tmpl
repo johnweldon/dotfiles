@@ -10,7 +10,8 @@ x11vnc \
   -allow 10.36. \
   -allow 100. \
   -listen 0.0.0.0 \
-  -bg 
+  -ssl SAVE \
+  -bg
 
 [ -f "{{ .chezmoi.homeDir }}/.vnc/.Xresources" ] && xrdb "{{ .chezmoi.homeDir }}/.vnc/.Xresources"
 

@@ -19,9 +19,9 @@
   lsu = diff --name-only --diff-filter=U --relative
   un  = ls-files -o --exclude-standard
 
-  d  = "!f() { git diff-index --quiet HEAD -- ; git diff --patch-with-stat; }; f"
+  d  = diff --patch-with-stat
   dc = diff --cached --patch-with-stat -w
-  dw = "!f() { git diff-index --quiet HEAD -- ; git diff --word-diff=color --patch-with-stat; }; f"
+  dw = diff --word-diff=color --patch-with-stat
   sh = "!f() { git show --pretty=medium --minimal -w ${1:-HEAD}; }; f"
 
   f = "!f() { git fetch --tags --prune; }; f"
