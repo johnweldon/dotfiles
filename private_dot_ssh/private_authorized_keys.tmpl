@@ -1,3 +1,25 @@
-{{ with (index . "ssh") }}{{ with (index . "authorized_keys") }}{{ range . }}{{ . }}
-{{ end }}{{ end }}{{ end }}{{ with (index . "user") }}{{ with (index . "github") }}{{ range (gitHubKeys .) }}{{ .Key }}
-{{ end }}{{ end }}{{ end -}}
+{{ $orig := "" -}}
+{{ $keys := list -}}
+{{ $pth := (joinPath .chezmoi.homeDir ".ssh/authorized_keys") -}}
+{{ if stat $pth }}{{ $orig = (include $pth | trim) }}{{ end -}}
+{{ if eq 0 (len $orig) }}{{ $orig = "#" }}{{ end -}}
+
+{{- with (index . "ssh") }}
+  {{- with (index . "authorized_keys") }}
+    {{- range . }}
+      {{- $keys = append $keys . }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+
+{{- with (index . "user") }}
+  {{- with (index . "github") }}
+    {{- range (gitHubKeys .) }}
+      {{- $keys = append $keys .Key }}
+    {{- end }}
+  {{- end }}
+{{- end -}}
+
+{{ if ne 0 (len $keys) }}{{ range $keys }}{{ . }}
+{{ end }}{{ else }}{{ $orig }}
+{{ end -}}

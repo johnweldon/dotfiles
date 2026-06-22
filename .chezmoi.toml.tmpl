@@ -24,22 +24,27 @@
 {{- end -}}
 
 {{- if (eq $name "") -}}
-{{-   $name = promptString "Display Name" -}}
+{{-   $name = promptString "Display Name" "John Weldon" -}}
 {{- end -}}
 
 {{- if (eq $email "") -}}
-{{-   $email = promptString "Email Address" -}}
+{{-   $email = promptString "Email Address" "johnweldon4@gmail.com" -}}
 {{- end -}}
 
 {{- if (eq $github "") -}}
-{{-   $github = promptString "GitHub ID (for importing authorized ssh keys)" -}}
+{{-   $github = promptString "GitHub ID (for importing authorized ssh keys)" "johnweldon" -}}
 {{- end -}}
 
 {{- if (eq $tz "") -}}
 {{-   $tz = promptString "Timezone (e.g., America/Phoenix, America/New_York)" "America/Phoenix" -}}
 {{- end -}}
 
+{{- $profile := env "DOTFILES_PROFILE" -}}
+{{- if eq $profile "" -}}{{- $profile = promptStringOnce . "profile" "Install profile (full/minimal)" "full" -}}{{- end -}}
+
 [data]
+
+  profile = {{ $profile | quote }}
 
   [data.user]
     name = {{ $name | quote }}

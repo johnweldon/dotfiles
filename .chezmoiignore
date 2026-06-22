@@ -1,5 +1,16 @@
 {{ if ne .chezmoi.os "windows" -}}
 Documents
 {{ end -}}
+README.md
 CLAUDE.md
 .claude
+{{ if and (hasKey . "profile") (eq .profile "minimal") -}}
+bin/brew-upgrade
+bin/pdftostdout
+build/data/Brewfile
+.astylerc
+.config/nvim
+.config/markdownlint-cli2.yaml
+.vnc
+Documents/PowerShell
+{{ end -}}

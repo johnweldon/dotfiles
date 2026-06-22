@@ -1,0 +1,56 @@
+set nocompatible
+
+scriptencoding utf-8
+set encoding=utf-8
+
+set autoindent
+set backspace=indent,eol,start
+set showmatch
+
+set expandtab
+set shiftround
+set shiftwidth=2
+set softtabstop=2
+set tabstop=2
+
+set hlsearch
+set viminfo=""
+set visualbell t_vb="<Esc>|1f"
+set noerrorbells
+set nowrap
+set noswapfile
+
+set autowrite
+set noshowmode
+
+" set number
+" set relativenumber
+
+set laststatus=2
+set ruler
+set showcmd
+set incsearch
+set wildmenu
+
+" set cursorline
+" set cursorcolumn
+
+set formatoptions+=j
+set display=lastline,uhex
+if exists('+breakindent')
+  set breakindent showbreak=>\
+endif
+set linebreak
+
+hi Error ctermbg=DarkRed
+hi SpellBad ctermbg=DarkRed
+
+if filereadable(findfile("~/.local.vimrc"))
+  source ~/.local.vimrc
+endif
+
+if v:version >= 800
+  packloadall
+endif
+
+silent! helptags ALL
