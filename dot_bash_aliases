@@ -22,6 +22,9 @@ alias lathr='ls -lathr'
 # shellcheck disable=SC2154
 alias where='for ix in "${!DIRSTACK[@]}"; do echo "${DIRSTACK[$ix]}"; done'
 
+# An alias, not +short in ~/.digrc: as a global default it renders NXDOMAIN and
+# NOERROR-with-no-record identically as empty output.
+alias digs='dig +short'
 alias dps="docker ps --format '{{ printf \"%-30s %-20s %s\" .Names .Status .Ports }}'"
 alias emacs='emacs -nw'
 alias k='kubectl'
