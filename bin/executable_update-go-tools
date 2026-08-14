@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+set -xeuo pipefail
+
+TAG="${1:-latest}"
+
+go install github.com/air-verse/air@${TAG}
+go install github.com/boyter/scc/v3@${TAG}
+go install github.com/derailed/k9s@${TAG}
+go install github.com/dimonomid/nerdlog/cmd/nerdlog@${TAG}
+go install github.com/fatih/gomodifytags@${TAG}
+go install github.com/go-delve/delve/cmd/dlv@${TAG}
+go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@${TAG}
+go install github.com/goreleaser/goreleaser/v2@${TAG}
+go install github.com/johnweldon/git-all/cmd/git-all@${TAG}
+go install github.com/josharian/impl@${TAG}
+go install github.com/jw4/tpl@latest
+go install github.com/kisielk/errcheck@${TAG}
+go install github.com/mgechev/revive@${TAG}
+go install github.com/rogpeppe/godef@${TAG}
+go install github.com/spf13/cobra-cli@${TAG}
+go install github.com/wader/fq@${TAG}
+go install github.com/xyproto/algernon@${TAG}
+go install golang.org/x/tools/cmd/godex@${TAG}
+go install golang.org/x/tools/cmd/godoc@${TAG}
+go install golang.org/x/tools/cmd/goimports@${TAG}
+go install golang.org/x/tools/cmd/gonew@${TAG}
+go install golang.org/x/tools/cmd/gorename@${TAG}
+go install golang.org/x/tools/cmd/present@${TAG}
+go install golang.org/x/tools/gopls@${TAG}
+go install honnef.co/go/tools/cmd/staticcheck@${TAG}
+go install honnef.co/go/tools/cmd/structlayout-optimize@${TAG}
+go install honnef.co/go/tools/cmd/structlayout-pretty@${TAG}
+go install honnef.co/go/tools/cmd/structlayout@${TAG}
+go install mvdan.cc/gofumpt@${TAG}
+go install mvdan.cc/sh/v3/cmd/shfmt@${TAG}
+go install sigs.k8s.io/cloud-provider-kind@${TAG}
+go install sigs.k8s.io/kind@${TAG}

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+set -xeuo pipefail
+
+TAG="${1:-latest}"
+
+go install github.com/nats-io/nats-server/v2@${TAG}
+go install github.com/nats-io/natscli/nats@${TAG}
+go install github.com/nats-io/nkeys/nk@${TAG}
+go install github.com/nats-io/nsc@${TAG}
+go install github.com/nats-io/nats-top@${TAG}

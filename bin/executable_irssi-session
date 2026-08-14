@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+tmux new-session -s irssi \; \
+  new-window -n irssi "irssi -c LiberaChat" \; \
+  set monitor-activity off \; \
+  new-window -n cmd \; \
+  select-window -t 1
+  

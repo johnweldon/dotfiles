@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+[ $# -gt 0 ] || { echo "usage: ${0##*/} <host>..." >&2; exit 2; }
+
+# `read -i` is silently ignored without `-e`, so the "no" default comes from the
+# case fallthrough below rather than from prefilling the input buffer. REPLY is
+# pre-set so an EOF on stdin leaves it defined under `set -u` (and declines).
+REPLY=""
+read -r -p "do you want to restart $* ? (yN) " || true
+
+case "${REPLY}" in
+  y | Y | yes | YES) ;;
+  *) exit ;;
+esac
+
+for host in "$@"; do
+  echo "restarting ${host}"
+  ssh "${host}" sudo reboot || true
+done

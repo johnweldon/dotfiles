@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+
+set -eou pipefail
+
+if ! sudo -vN; then
+  echo "sudo is not configured to allow running commands without a password"
+  exit 1
+fi
+
+new_version="${1:?missing new go version}"
+
+go_root=$(go env GOROOT)
+go_version=$(go env GOVERSION)
+go_hostarch=$(go env GOHOSTARCH)
+go_hostos=$(go env GOHOSTOS)
+
+if [ -z "${go_root}" ]; then
+  echo "GOROOT is not set"
+  exit 1
+fi
+
+if [ -z "${go_version}" ]; then
+  echo "GOVERSION is not set"
+  exit 1
+fi
+
+if [ -z "${go_hostarch}" ]; then
+  echo "GOHOSTARCH is not set"
+  exit 1
+fi
+
+if [ -z "${go_hostos}" ]; then
+  echo "GOHOSTOS is not set"
+  exit 1
+fi
+
+tmpdir=$(mktemp -d)
+bakdir=""
+
+function restore_original {
+  if [ -n "${bakdir}" ]; then
+    echo "Restoring original version of Go"
+    mv "${bakdir}" "${go_root}"
+  fi
+}
+
+trap restore_original ERR
+
+function cleanup_tmpdir {
+  if [ -d "${tmpdir}" ]; then
+    echo "Removing tempdir ${tmpdir}"
+    rm -rf "${tmpdir}"
+  fi
+}
+
+trap cleanup_tmpdir EXIT
+
+function download_and_extract_go {
+  echo "Downloading and extracting new version of Go"
+  local url="https://golang.org/dl/${new_version}.${go_hostos}-${go_hostarch}.tar.gz"
+  curl -fsSL "${url}" | tar -C "${tmpdir}" -xzf -
+}
+
+function swap_go {
+  echo "Swapping new version of Go in"
+  bakdir="$(dirname "${go_root}")/${go_version}"
+  sudo mv "${go_root}" "${bakdir}"
+  sudo mv "${tmpdir}/go" "${go_root}"
+}
+
+download_and_extract_go
+swap_go
