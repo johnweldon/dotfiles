@@ -27,6 +27,11 @@ alias where='for ix in "${!DIRSTACK[@]}"; do echo "${DIRSTACK[$ix]}"; done'
 alias digs='dig +short'
 alias dps="docker ps --format '{{ printf \"%-30s %-20s %s\" .Names .Status .Ports }}'"
 alias emacs='emacs -nw'
+# jw4/jot (C) defaults to a bare dated file in the CURRENT directory; this
+# restores the old ~/bin/jot behaviour of a dated note under ~/notes. Note -r is
+# concatenated with the filename rather than path-joined, so the trailing slash
+# on the default is required.
+alias jot='jot -d -r "${NOTES_DIR:-$HOME/notes/}" -s .md'
 alias k='kubectl'
 alias python='python3'
 alias tf='terraform'
