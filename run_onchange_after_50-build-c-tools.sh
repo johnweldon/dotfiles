@@ -14,7 +14,7 @@
 # Pinned revisions -- bump a SHA to pick up upstream changes:
 #   cleanpath       jw4/tcleanpath              5dbcb02e  2025-06-18
 #   jot             jw4/jot                     26332d8f  2024-04-12
-#   list-git-repos  johnweldon/list-git-repos   51c6c77e  2023-01-25
+#   list-git-repos  johnweldon/list-git-repos   e6694cb1  2026-08-14
 #   statusline      johnweldon/statusline       44e41042  2026-06-06
 
 set -euo pipefail
@@ -32,7 +32,7 @@ CACHE="${XDG_CACHE_HOME:-${HOME}/.cache}/chezmoi-c-tools"
 TOOLS="
 cleanpath|https://github.com/jw4/tcleanpath.git|5dbcb02eecb55de8d18b4d72f44bd4c2f037a37b|cleanpath
 jot|https://github.com/jw4/jot.git|26332d8fe354ae4431e1241734a8040265534314|jot
-list-git-repos|https://github.com/johnweldon/list-git-repos.git|51c6c77e32de0eed7438c77f72e27cecccf6a762|list-git-repos
+list-git-repos|https://github.com/johnweldon/list-git-repos.git|e6694cb179c9c1f6b92056e95cb873852e3741f6|list-git-repos
 statusline|https://github.com/johnweldon/statusline.git|44e41042dc02891cfd0f2b313b77cd8ebfa3b44f|statusline
 "
 
