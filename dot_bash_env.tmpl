@@ -13,8 +13,8 @@ __BASH_ENV_LOADED=1
 
 _prepend_path() {
   case ":${PATH}:" in
-    *:"$1":*) ;;
-    *) [ -d "$1" ] && PATH="$1:${PATH}" ;;
+  *:"$1":*) ;;
+  *) [ -d "$1" ] && PATH="$1:${PATH}" ;;
   esac
 }
 _prepend_path "/usr/local/go/bin"
@@ -36,8 +36,14 @@ export PAGER=less
 {{ with (index . "user") }}{{ with (index . "tz") }}export TZ='{{ . }}'
 {{ end }}{{ end }}
 export EDITOR=vi VISUAL=vi
-command -v vim  > /dev/null 2>&1 && { EDITOR=vim;  VISUAL=vim; }
-command -v nvim > /dev/null 2>&1 && { EDITOR=nvim; VISUAL=nvim; }
+command -v vim >/dev/null 2>&1 && {
+  EDITOR=vim
+  VISUAL=vim
+}
+command -v nvim >/dev/null 2>&1 && {
+  EDITOR=nvim
+  VISUAL=nvim
+}
 export EDITOR VISUAL
 
 # machine-local env overrides (not chezmoi-managed; keep at mode 0600 -- it may
