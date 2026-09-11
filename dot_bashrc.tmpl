@@ -59,7 +59,9 @@ fi
 
 {{ if eq .chezmoi.os "darwin" -}}
 (command -v brew >/dev/null) && {
-  HOMEBREW_PREFIX="$(brew --prefix)"
+  # ~/.bash_env exports HOMEBREW_PREFIX already on machines whose
+  # ~/.local.bash_env sets it; fall back to `brew --prefix` (~9ms) elsewhere.
+  HOMEBREW_PREFIX="${HOMEBREW_PREFIX:-$(brew --prefix)}"
   if [[ -r "${HOMEBREW_PREFIX}/etc/profile.d/bash_completion.sh" ]]; then
     # shellcheck disable=SC1091
     source "${HOMEBREW_PREFIX}/etc/profile.d/bash_completion.sh"
@@ -85,8 +87,15 @@ function start_ssh_agent() {
   # shellcheck disable=SC1090,SC1091
   (command -v ssh-agent >/dev/null 2>&1) && {
     if command -v keychain >/dev/null 2>&1; then {
-      find "${HOME}/.ssh" -maxdepth 1 -name 'id_*' ! -name '*.pub' -print0 | xargs -0 keychain -q
-      source "${HOME}/.keychain/${HOSTNAME}-sh"
+      # Reuse a live agent when there is one: the keychain scan costs ~150ms
+      # and would otherwise run on every shell, including every tmux window.
+      # shellcheck disable=SC1090,SC1091
+      [ -r "${HOME}/.keychain/${HOSTNAME}-sh" ] && source "${HOME}/.keychain/${HOSTNAME}-sh"
+      if ! ssh-add -l >/dev/null 2>&1; then
+        find "${HOME}/.ssh" -maxdepth 1 -name 'id_*' ! -name '*.pub' -print0 | xargs -0 keychain -q
+        # shellcheck disable=SC1090,SC1091
+        source "${HOME}/.keychain/${HOSTNAME}-sh"
+      fi
     }; else
       {
         # Use flock to prevent race conditions when multiple shells start simultaneously

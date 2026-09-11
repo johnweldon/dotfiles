@@ -5,6 +5,12 @@
 # ~/.bashrc, so the source line there sits above the interactive guard).
 # Keep POSIX-sh compatible, idempotent, and silent (no output).
 
+# Idempotence guard: ~/.profile and ~/.bashrc both source this file, so a login
+# interactive shell (every tmux window) would otherwise run all of it twice,
+# including ~/.local.bash_env and its brew lookups.
+[ -n "${__BASH_ENV_LOADED:-}" ] && return
+__BASH_ENV_LOADED=1
+
 _prepend_path() {
   case ":${PATH}:" in
     *:"$1":*) ;;
