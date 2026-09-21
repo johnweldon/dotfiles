@@ -18,7 +18,6 @@
 {{- $managed := false -}}
 {{- $identity_agent := "" -}}
 {{- $hosts := "" -}}
-{{- $extra := "" -}}
 
 {{- with (index . "ssh") -}}
 {{-   if hasKey . "no_agent" -}}{{- $noagent = (index . "no_agent") -}}{{- end -}}
@@ -27,7 +26,6 @@
 {{-   if hasKey . "managed" -}}{{- $managed = (index . "managed") -}}{{- end -}}
 {{-   with (index . "identity_agent") -}}{{- $identity_agent = . -}}{{- end -}}
 {{-   with (index . "hosts") -}}{{- $hosts = . -}}{{- end -}}
-{{-   with (index . "extra") -}}{{- $extra = . -}}{{- end -}}
 {{- end -}}
 
 {{- /* [data.net] carries every host name, domain and address that
@@ -137,11 +135,8 @@
     config = '''
 {{ $config }}'''
 
-    # Blocks that name specific hosts, emitted just after the mDNS probe block
-    # so their explicit HostName wins over canonicalization.
+    # Every host-specific block, emitted just after the mDNS probe block so an
+    # explicit HostName wins over canonicalization.
     hosts = '''
 {{ $hosts }}'''
 
-    # Appended at the end of the shared body.
-    extra = '''
-{{ $extra }}'''

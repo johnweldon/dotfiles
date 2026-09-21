@@ -85,24 +85,18 @@ Match final host "{{ $n.lan_only }}" !exec "{{ $probe }} -c 22 %h"
 Match host "{{ $agent }},*.local,*.{{ $lan }},*.{{ $ts }}"
   ForwardAgent yes
 
-# Stable machines: track host keys without first-use prompts
-Match final host "{{ $stable }}"
-  StrictHostKeyChecking accept-new
-  UserKnownHostsFile ~/.ssh/known_hosts.home
-
-# mDNS names are link-local, so on a foreign network any device can claim one
-# (pi.local is the Raspberry Pi factory default). Unlike the block below,
-# .local keeps real host key tracking and a visible log level so a hijacked
-# name fails loudly. Hosts already named above keep their settings; this
-# covers the rest.
-Match final host "*.local"
+# Machines whose host keys are worth tracking, plus every mDNS name. Unlike
+# the block below, these keep real host key tracking and a log level that
+# lets a mismatch be seen: .local is link-local, so on a foreign network any
+# device can claim a name (pi.local is the Raspberry Pi factory default), and
+# a stable machine's key changing is worth hearing about either way.
+Match final host "{{ $stable }},*.local"
   StrictHostKeyChecking accept-new
   UserKnownHostsFile ~/.ssh/known_hosts.home
   LogLevel ERROR
 
 # Everything on the LAN or tailnet, typed short or as FQDN
 Match final host "{{ $shared }},*.local,*.{{ $lan }},*.{{ $ts }}"
-  ForwardAgent yes
   StrictHostKeyChecking no
   UserKnownHostsFile /dev/null
   LogLevel QUIET
@@ -112,10 +106,6 @@ Match final host "{{ $shared }},*.local,*.{{ $lan }},*.{{ $ts }}"
 
 Match final host "{{ $login }}"
   User {{ $n.user }}
-{{- with (index .ssh "extra") }}
-
-{{ . }}
-{{- end }}
 {{- end }}
 
 Host *
