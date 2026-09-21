@@ -98,6 +98,26 @@
     github = {{ $github | quote }}
     tz = {{ $tz | quote }}
 
+  [data.net]
+    lan_domain = {{ $lan_domain | quote }}
+    ts_domain = {{ $ts_domain | quote }}
+    jump = {{ $jump | quote }}
+    user = {{ $sshuser | quote }}
+    lan_cidr = {{ $lan_cidr | quote }}
+    lan_only = {{ $lan_only | quote }}
+
+    # Primitive host sets. private_config.tmpl composes the ssh Match pattern
+    # lists from these, so each name is written once instead of repeated across
+    # four strings that drift. Entries are ssh patterns verbatim, which is why
+    # "pi" needs both "pi" and "pi.*": "pi*" would also match "pineapple".
+    stable = [{{ range $stable }}{{ . | quote }}, {{ end }}]
+    roamers = [{{ range $roamers }}{{ . | quote }}, {{ end }}]
+    login_also = [{{ range $login_also }}{{ . | quote }}, {{ end }}]
+    ephemeral = [{{ range $ephemeral }}{{ . | quote }}, {{ end }}]
+    agent_also = [{{ range $agent_also }}{{ . | quote }}, {{ end }}]
+    shared_also = [{{ range $shared_also }}{{ . | quote }}, {{ end }}]
+    exclude = [{{ range $exclude }}{{ . | quote }}, {{ end }}]
+
   [data.ssh]
     # true renders the shared body from private_dot_ssh/private_config.tmpl,
     # which needs [data.net] below populated. false renders only the trailing
@@ -125,23 +145,3 @@
     # Appended at the end of the shared body.
     extra = '''
 {{ $extra }}'''
-
-  [data.net]
-    lan_domain = {{ $lan_domain | quote }}
-    ts_domain = {{ $ts_domain | quote }}
-    jump = {{ $jump | quote }}
-    user = {{ $sshuser | quote }}
-    lan_cidr = {{ $lan_cidr | quote }}
-    lan_only = {{ $lan_only | quote }}
-
-    # Primitive host sets. private_config.tmpl composes the ssh Match pattern
-    # lists from these, so each name is written once instead of repeated across
-    # four strings that drift. Entries are ssh patterns verbatim, which is why
-    # "pi" needs both "pi" and "pi.*": "pi*" would also match "pineapple".
-    stable = [{{ range $stable }}{{ . | quote }}, {{ end }}]
-    roamers = [{{ range $roamers }}{{ . | quote }}, {{ end }}]
-    login_also = [{{ range $login_also }}{{ . | quote }}, {{ end }}]
-    ephemeral = [{{ range $ephemeral }}{{ . | quote }}, {{ end }}]
-    agent_also = [{{ range $agent_also }}{{ . | quote }}, {{ end }}]
-    shared_also = [{{ range $shared_also }}{{ . | quote }}, {{ end }}]
-    exclude = [{{ range $exclude }}{{ . | quote }}, {{ end }}]
