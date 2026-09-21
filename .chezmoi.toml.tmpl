@@ -12,15 +12,60 @@
 {{-   with (index . "tz") -}}{{- $tz = . -}}{{- end -}}
 {{- end -}}
 
-
 {{- $noagent := true -}}
 {{- $authorized_keys := "" -}}
 {{- $config := "" -}}
+{{- $managed := false -}}
+{{- $identity_agent := "" -}}
+{{- $hosts := "" -}}
+{{- $extra := "" -}}
 
 {{- with (index . "ssh") -}}
 {{-   if hasKey . "no_agent" -}}{{- $noagent = (index . "no_agent") -}}{{- end -}}
 {{-   with (index . "authorized_keys") -}}{{- $authorized_keys = . -}}{{- end -}}
 {{-   with (index . "config") -}}{{- $config = . -}}{{- end -}}
+{{-   if hasKey . "managed" -}}{{- $managed = (index . "managed") -}}{{- end -}}
+{{-   with (index . "identity_agent") -}}{{- $identity_agent = . -}}{{- end -}}
+{{-   with (index . "hosts") -}}{{- $hosts = . -}}{{- end -}}
+{{-   with (index . "extra") -}}{{- $extra = . -}}{{- end -}}
+{{- end -}}
+
+{{- /* [data.net] carries every host name, domain and address that
+       private_dot_ssh/private_config.tmpl needs. Nothing here has a default,
+       because the dotfiles repo is public and these must never be committed
+       to it. A new machine therefore starts empty, with managed = false, and
+       renders only the trailing `Host * / ForwardAgent no`. To bring one up:
+       copy ~/.config/chezmoi/chezmoi.toml from a machine that already works,
+       drop that machine's own self-block from [data.ssh].hosts, and set
+       managed = true. */ -}}
+{{- $lan_domain := "" -}}
+{{- $ts_domain := "" -}}
+{{- $jump := "" -}}
+{{- $sshuser := "" -}}
+{{- $lan_cidr := "" -}}
+{{- $lan_only := "" -}}
+{{- $stable := list -}}
+{{- $roamers := list -}}
+{{- $login_also := list -}}
+{{- $ephemeral := list -}}
+{{- $agent_also := list -}}
+{{- $shared_also := list -}}
+{{- $exclude := list -}}
+
+{{- with (index . "net") -}}
+{{-   with (index . "lan_domain") -}}{{- $lan_domain = . -}}{{- end -}}
+{{-   with (index . "ts_domain") -}}{{- $ts_domain = . -}}{{- end -}}
+{{-   with (index . "jump") -}}{{- $jump = . -}}{{- end -}}
+{{-   with (index . "user") -}}{{- $sshuser = . -}}{{- end -}}
+{{-   with (index . "lan_cidr") -}}{{- $lan_cidr = . -}}{{- end -}}
+{{-   with (index . "lan_only") -}}{{- $lan_only = . -}}{{- end -}}
+{{-   with (index . "stable") -}}{{- $stable = . -}}{{- end -}}
+{{-   with (index . "roamers") -}}{{- $roamers = . -}}{{- end -}}
+{{-   with (index . "login_also") -}}{{- $login_also = . -}}{{- end -}}
+{{-   with (index . "ephemeral") -}}{{- $ephemeral = . -}}{{- end -}}
+{{-   with (index . "agent_also") -}}{{- $agent_also = . -}}{{- end -}}
+{{-   with (index . "shared_also") -}}{{- $shared_also = . -}}{{- end -}}
+{{-   with (index . "exclude") -}}{{- $exclude = . -}}{{- end -}}
 {{- end -}}
 
 {{- if (eq $name "") -}}
@@ -54,10 +99,49 @@
     tz = {{ $tz | quote }}
 
   [data.ssh]
+    # true renders the shared body from private_dot_ssh/private_config.tmpl,
+    # which needs [data.net] below populated. false renders only the trailing
+    # `Host * / ForwardAgent no` plus `config`. The minimal profile forces
+    # false regardless, and also skips building hostprobe.
+    managed = {{ $managed }}
     no_agent = {{ $noagent }}
     authorized_keys = [{{ with $authorized_keys}}{{ range . }}
       {{ . | quote }},{{ end }}
     {{ end }}]
 
+    # An ssh agent socket, e.g. a password manager's. Empty means no
+    # IdentityAgent line at all.
+    identity_agent = {{ $identity_agent | quote }}
+
+    # Used only when managed = false.
     config = '''
 {{ $config }}'''
+
+    # Blocks that name specific hosts, emitted just after the mDNS probe block
+    # so their explicit HostName wins over canonicalization.
+    hosts = '''
+{{ $hosts }}'''
+
+    # Appended at the end of the shared body.
+    extra = '''
+{{ $extra }}'''
+
+  [data.net]
+    lan_domain = {{ $lan_domain | quote }}
+    ts_domain = {{ $ts_domain | quote }}
+    jump = {{ $jump | quote }}
+    user = {{ $sshuser | quote }}
+    lan_cidr = {{ $lan_cidr | quote }}
+    lan_only = {{ $lan_only | quote }}
+
+    # Primitive host sets. private_config.tmpl composes the ssh Match pattern
+    # lists from these, so each name is written once instead of repeated across
+    # four strings that drift. Entries are ssh patterns verbatim, which is why
+    # "pi" needs both "pi" and "pi.*": "pi*" would also match "pineapple".
+    stable = [{{ range $stable }}{{ . | quote }}, {{ end }}]
+    roamers = [{{ range $roamers }}{{ . | quote }}, {{ end }}]
+    login_also = [{{ range $login_also }}{{ . | quote }}, {{ end }}]
+    ephemeral = [{{ range $ephemeral }}{{ . | quote }}, {{ end }}]
+    agent_also = [{{ range $agent_also }}{{ . | quote }}, {{ end }}]
+    shared_also = [{{ range $shared_also }}{{ . | quote }}, {{ end }}]
+    exclude = [{{ range $exclude }}{{ . | quote }}, {{ end }}]

@@ -13,4 +13,5 @@ build/data/Brewfile
 .config/markdownlint-cli2.yaml
 .vnc
 Documents/PowerShell
+51-build-hostprobe.sh
 {{ end -}}

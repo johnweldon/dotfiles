@@ -3,13 +3,28 @@
 {{- with (index . "ssh") -}}
 {{-   with (index . "managed") }}{{ $managed = . }}{{ end -}}
 {{- end -}}
-{{- if not $managed -}}
-{{- /* Not migrated: keep this host's own [data.ssh].config verbatim. */ -}}
+{{- $minimal := and (hasKey . "profile") (eq .profile "minimal") -}}
+{{- if or (not $managed) $minimal -}}
+{{- /* Unmanaged or minimal profile: keep this host's own [data.ssh].config
+       verbatim. Minimal hosts also skip the hostprobe build via
+       .chezmoiignore, so the probe blocks would have no binary anyway. */ -}}
 {{ with (index . "ssh") }}{{ with (index . "config") }}{{.}}{{ end }}{{ end }}
 {{- else -}}
 {{- $n := .net -}}
 {{- $lan := $n.lan_domain -}}
 {{- $ts := $n.ts_domain -}}
+{{- /*
+   The four Match pattern lists are composed here from the primitive host
+   sets in [data.net], so each name is written once rather than repeated
+   across four strings that can drift apart. Entries are ssh patterns
+   verbatim, which is why `pi` needs both `pi` and `pi.*`: `pi*` would also
+   match `pineapple`. Pattern order within a list is not significant to ssh,
+   including for the negated entries.
+*/ -}}
+{{- $agent := concat $n.stable $n.roamers $n.login_also $n.ephemeral $n.agent_also (list $n.lan_cidr) $n.exclude | join "," -}}
+{{- $stable := join "," $n.stable -}}
+{{- $login := concat $n.stable $n.login_also $n.ephemeral | join "," -}}
+{{- $shared := concat $n.exclude (list $n.lan_cidr) $n.ephemeral $n.shared_also | join "," -}}
 # Managed by chezmoi from private_dot_ssh/private_config.tmpl. This file holds
 # the structure only. Every host name, domain and address comes from
 # [data.net] and [data.ssh] in ~/.config/chezmoi/chezmoi.toml, which is not
@@ -67,11 +82,11 @@ Match final host "{{ $n.lan_only }}" !exec "{{ $probe }} -c 22 %h"
 # ForwardAgent must be decided in the first config pass: the trailing `Host *`
 # sets ForwardAgent no, and first-obtained wins before any Match final block
 # runs. Patterns cover typed short names and FQDNs.
-Match host "{{ $n.agent }},*.local,*.{{ $lan }},*.{{ $ts }}"
+Match host "{{ $agent }},*.local,*.{{ $lan }},*.{{ $ts }}"
   ForwardAgent yes
 
 # Stable machines: track host keys without first-use prompts
-Match final host "{{ $n.stable }}"
+Match final host "{{ $stable }}"
   StrictHostKeyChecking accept-new
   UserKnownHostsFile ~/.ssh/known_hosts.home
 
@@ -86,7 +101,7 @@ Match final host "*.local"
   LogLevel ERROR
 
 # Everything on the LAN or tailnet, typed short or as FQDN
-Match final host "{{ $n.shared }},*.local,*.{{ $lan }},*.{{ $ts }}"
+Match final host "{{ $shared }},*.local,*.{{ $lan }},*.{{ $ts }}"
   ForwardAgent yes
   StrictHostKeyChecking no
   UserKnownHostsFile /dev/null
@@ -95,7 +110,7 @@ Match final host "{{ $n.shared }},*.local,*.{{ $lan }},*.{{ $ts }}"
   ControlPath ~/.ssh/sockets/%C
   ControlPersist 600
 
-Match final host "{{ $n.login }}"
+Match final host "{{ $login }}"
   User {{ $n.user }}
 {{- with (index .ssh "extra") }}
 
