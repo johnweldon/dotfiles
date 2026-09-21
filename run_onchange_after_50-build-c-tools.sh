@@ -42,7 +42,7 @@ warn() { printf 'build-c-tools: %s\n' "$*" >&2; }
 # A host without a toolchain is a normal case (minimal profile), not an error --
 # leave whatever is already installed alone and say so.
 for req in git make cc; do
-  if ! command -v "${req}" >/dev/null 2>&1; then
+  if ! command -v "${req}" > /dev/null 2>&1; then
     note "no ${req} on $(uname -n); skipping C tool builds"
     exit 0
   fi
@@ -70,16 +70,16 @@ while IFS='|' read -r name repo rev target; do
 
   # Detached checkout at the pinned revision. Reachability is what matters, so a
   # plain fetch of the default branch is enough for a SHA that is on it.
-  if ! git -C "${src}" checkout --quiet --detach "${rev}" 2>/dev/null; then
+  if ! git -C "${src}" checkout --quiet --detach "${rev}" 2> /dev/null; then
     warn "${name}: revision ${rev} not found; keeping existing binary"
     failed=$((failed + 1))
     continue
   fi
 
   # Clean first so switching revisions can never link stale object files.
-  make -C "${src}" clean >/dev/null 2>&1 || true
+  make -C "${src}" clean > /dev/null 2>&1 || true
 
-  if ! make -C "${src}" "${target}" >/dev/null 2>&1; then
+  if ! make -C "${src}" "${target}" > /dev/null 2>&1; then
     warn "${name}: build failed; keeping existing binary"
     failed=$((failed + 1))
     continue
@@ -91,10 +91,10 @@ while IFS='|' read -r name repo rev target; do
       # bashline/subagentline/antigravityline argv[0] symlinks. Use `install`
       # with an explicit PREFIX rather than `install-local`, which hardcodes
       # $(HOME)/.local/bin and would ignore BINDIR.
-      make -C "${src}" install PREFIX="${BINDIR}" >/dev/null
+      make -C "${src}" install PREFIX="${BINDIR}" > /dev/null
       # Claude Code reads ~/.claude/statusline specifically, so mirror it there.
       if [ -d "${CLAUDE_DIR}" ]; then
-        make -C "${src}" install-claude CLAUDE="${CLAUDE_DIR}" >/dev/null
+        make -C "${src}" install-claude CLAUDE="${CLAUDE_DIR}" > /dev/null
       fi
       ;;
     *)
@@ -103,7 +103,7 @@ while IFS='|' read -r name repo rev target; do
   esac
 
   note "installed ${name} (${rev:0:8}) -> ${BINDIR}"
-done <<EOF
+done << EOF
 ${TOOLS}
 EOF
 
