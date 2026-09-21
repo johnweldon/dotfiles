@@ -78,10 +78,14 @@ cat > "${build}/mdns-probe.c" << 'SOURCE'
 
 int main(int argc, char **argv) {
 	/*
-	 * Cold queries on a quiet link measured 189-252ms across four trials
-	 * spaced past the 120s mDNS cache TTL; warm ones answer in 1ms. 250ms
-	 * sat on top of that distribution and intermittently missed a host that
-	 * was present, so allow roughly 2x the observed worst case.
+	 * Cold lookups are bimodal: 15, 19, 187 and 1231ms across four trials
+	 * spaced past the 120s mDNS cache TTL, the outlier being a lost first
+	 * multicast query that mDNS retries a second later. Warm lookups run
+	 * 9-24ms. 500ms covers the fast mode with margin. Covering the retry
+	 * would cost 1.5s on every host that is not on the link, to fix a
+	 * fallthrough that is harmless -- ssh still connects via the LAN or
+	 * tailscale name -- and self-correcting, because the late answer still
+	 * lands in the resolver cache and the next lookup is warm.
 	 */
 	long ms = 500;
 	int i = 1;
