@@ -1,0 +1,4 @@
+# Git does not track empty directories, so without this file chezmoi never
+# creates ~/.ssh/sockets and every ControlMaster connection fails with
+# "unix_listener: cannot bind to path ... No such file or directory".
+# The hosts that worked had the directory created by hand years ago.
