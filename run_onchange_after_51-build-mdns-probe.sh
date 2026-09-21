@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Build and install mdns-probe, a deadline-bounded multicast DNS lookup used by
+# Build and install mdns-probe, a deadline-bounded hostname lookup used by
 # ~/.ssh/config to prefer a host's .local name over its LAN and tailscale names.
 #
 # Kept out of 50-build-c-tools.sh because that script builds pinned upstream
@@ -9,13 +9,15 @@
 # so editing the source below is exactly what triggers a rebuild.
 #
 # Why it exists: putting `local` in ssh's CanonicalDomains makes every lookup
-# for a host that is not on the current link pay mDNSResponder's full negative
-# timeout, measured at 5.0s on macOS. Bounding the query instead costs ~18ms on
-# a hit and ~515ms on a miss at the default 500ms deadline.
+# for a host that is not on the current link pay the resolver's full negative
+# timeout, measured at 5.0s on both macOS (mDNSResponder) and Linux (avahi via
+# nss-mdns). Bounding the query instead costs ~20ms on a hit and ~510ms on a
+# miss at the default 500ms deadline.
 #
-# Darwin only. The dns_sd API is in libSystem here and needs no linker flags; on
-# Linux it would require avahi-compat-libdns_sd. ssh treats a missing binary as
-# a failed Match exec and falls through to CanonicalDomains, so skipping is safe.
+# Portable: libc only, no Bonjour or avahi-compat headers, so the same source
+# builds on the darwin laptops and the linux boxes. A host with no compiler is
+# a normal case (minimal profile), and ssh treats a missing binary as a failed
+# Match exec and falls through to CanonicalDomains, so skipping is safe.
 
 set -euo pipefail
 
@@ -24,11 +26,6 @@ BINDIR="${CTOOLS_BINDIR:-${HOME}/.local/bin}"
 
 note() { printf 'build-mdns-probe: %s\n' "$*"; }
 warn() { printf 'build-mdns-probe: %s\n' "$*" >&2; }
-
-if [ "$(uname -s)" != Darwin ]; then
-  note "not darwin; skipping (ssh falls back to CanonicalDomains)"
-  exit 0
-fi
 
 if ! command -v cc > /dev/null 2>&1; then
   note "no cc on $(uname -n); skipping"
@@ -42,34 +39,42 @@ trap 'rm -rf "${build}"' EXIT
 
 cat > "${build}/mdns-probe.c" << 'SOURCE'
 /*
- * mdns-probe -- exit 0 if NAME answers on multicast DNS within a deadline.
+ * mdns-probe -- exit 0 if NAME resolves within a deadline.
  *
- * Used by ~/.ssh/config to prefer a host's .local name without paying
- * mDNSResponder's full negative-answer timeout (5s on macOS) for every
- * host that is not on the current link.
+ * Used by ~/.ssh/config to prefer a host's .local name over its LAN and
+ * tailscale names without paying the resolver's full negative-answer timeout
+ * for a name that is not on the current link. That timeout is 5.0s on both
+ * macOS (mDNSResponder) and Linux (avahi through nss-mdns), measured.
+ *
+ * getaddrinfo takes no timeout and cannot be cancelled safely, so the lookup
+ * runs in forked children that report success down a shared pipe. The parent
+ * waits on the pipe with select(2) and kills them at the deadline. EOF means
+ * every child finished without resolving, which ends the wait early.
+ *
+ * One child per address family, because getaddrinfo only returns once it has
+ * resolved A and AAAA both, and an unanswered family costs the full mDNS
+ * timeout. Splitting them lets the first family to answer win. This is only a
+ * presence test; ssh resolves the name itself once the config selects it.
+ *
+ * Deliberately resolver-agnostic rather than calling Bonjour or avahi directly:
+ * one source builds on darwin and linux against libc alone, and .local is
+ * reserved for mDNS by RFC 6762, so both systems route it to mDNS anyway.
  *
  * usage: mdns-probe [-t MILLISECONDS] NAME
- * exit:  0 found, 1 not found before deadline, 2 usage or API error
+ * exit:  0 resolved, 1 not resolved before the deadline, 2 usage error
  */
 
-#include <dns_sd.h>
 #include <errno.h>
+#include <netdb.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/select.h>
 #include <sys/socket.h>
 #include <sys/time.h>
-
-static int found;
-
-static void cb(DNSServiceRef ref, DNSServiceFlags flags, uint32_t ifindex,
-               DNSServiceErrorType err, const char *host,
-               const struct sockaddr *addr, uint32_t ttl, void *ctx) {
-	(void)ref, (void)ifindex, (void)host, (void)ttl, (void)ctx;
-	if (err == kDNSServiceErr_NoError && (flags & kDNSServiceFlagsAdd) &&
-	    addr && (addr->sa_family == AF_INET || addr->sa_family == AF_INET6))
-		found = 1;
-}
+#include <sys/wait.h>
+#include <unistd.h>
 
 int main(int argc, char **argv) {
 	/*
@@ -90,43 +95,76 @@ int main(int argc, char **argv) {
 		return 2;
 	}
 
-	DNSServiceRef ref;
-	if (DNSServiceGetAddrInfo(&ref, kDNSServiceFlagsForceMulticast,
-	                          kDNSServiceInterfaceIndexAny,
-	                          kDNSServiceProtocol_IPv4 | kDNSServiceProtocol_IPv6,
-	                          argv[i], cb, NULL) != kDNSServiceErr_NoError)
+	struct timeval start;
+	gettimeofday(&start, NULL);
+
+	int fd[2];
+	if (pipe(fd) != 0)
 		return 2;
 
-	int fd = DNSServiceRefSockFD(ref);
+	const int families[] = { AF_INET, AF_INET6 };
+	const int nkids = (int)(sizeof families / sizeof families[0]);
+	pid_t kids[sizeof families / sizeof families[0]];
+
+	for (int k = 0; k < nkids; k++) {
+		kids[k] = fork();
+		if (kids[k] < 0)
+			return 2;
+		if (kids[k] == 0) {
+			close(fd[0]);
+			struct addrinfo hints, *res;
+			memset(&hints, 0, sizeof hints);
+			hints.ai_family = families[k];
+			hints.ai_socktype = SOCK_STREAM;
+			if (getaddrinfo(argv[i], NULL, &hints, &res) == 0 && res != NULL)
+				if (write(fd[1], "1", 1) != 1)
+					_exit(1);
+			_exit(0);
+		}
+	}
+	close(fd[1]);
+
 	struct timeval deadline, now, tv;
-	gettimeofday(&deadline, NULL);
 	tv.tv_sec = ms / 1000;
 	tv.tv_usec = (ms % 1000) * 1000;
-	timeradd(&deadline, &tv, &deadline);
+	timeradd(&start, &tv, &deadline);
 
-	while (!found) {
+	int found = 0;
+	for (;;) {
 		gettimeofday(&now, NULL);
 		if (timercmp(&now, &deadline, >=))
 			break;
 		timersub(&deadline, &now, &tv);
 		fd_set rs;
 		FD_ZERO(&rs);
-		FD_SET(fd, &rs);
-		int n = select(fd + 1, &rs, NULL, NULL, &tv);
-		if (n < 0 && errno == EINTR)
-			continue;
-		if (n <= 0 || DNSServiceProcessResult(ref) != kDNSServiceErr_NoError)
+		FD_SET(fd[0], &rs);
+		int n = select(fd[0] + 1, &rs, NULL, NULL, &tv);
+		if (n < 0) {
+			if (errno == EINTR)
+				continue;
 			break;
+		}
+		if (n == 0)
+			break;
+		/* Readable: a byte means resolved, EOF means every child gave up. */
+		char c;
+		found = read(fd[0], &c, 1) == 1;
+		break;
 	}
 
-	DNSServiceRefDeallocate(ref);
-	if (getenv("MDNS_PROBE_VERBOSE")) {
-		struct timeval end;
-		gettimeofday(&end, NULL);
-		timersub(&deadline, &end, &tv);
-		fprintf(stderr, "%s %s after %ldms\n", argv[i], found ? "found" : "MISS",
-		        ms - (tv.tv_sec * 1000 + tv.tv_usec / 1000));
+	for (int k = 0; k < nkids; k++) {
+		kill(kids[k], SIGKILL);
+		waitpid(kids[k], NULL, 0);
 	}
+	close(fd[0]);
+
+	if (getenv("MDNS_PROBE_VERBOSE")) {
+		gettimeofday(&now, NULL);
+		timersub(&now, &start, &tv);
+		fprintf(stderr, "%s %s after %ldms\n", argv[i], found ? "found" : "MISS",
+		        (long)(tv.tv_sec * 1000 + tv.tv_usec / 1000));
+	}
+
 	return found ? 0 : 1;
 }
 SOURCE
