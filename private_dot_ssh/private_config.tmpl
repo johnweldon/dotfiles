@@ -1,4 +1,114 @@
+{{- $probe := "~/.local/bin/hostprobe" -}}
+{{- $managed := false -}}
+{{- with (index . "ssh") -}}
+{{-   with (index . "managed") }}{{ $managed = . }}{{ end -}}
+{{- end -}}
+{{- if not $managed -}}
+{{- /* Not migrated: keep this host's own [data.ssh].config verbatim. */ -}}
 {{ with (index . "ssh") }}{{ with (index . "config") }}{{.}}{{ end }}{{ end }}
+{{- else -}}
+{{- $n := .net -}}
+{{- $lan := $n.lan_domain -}}
+{{- $ts := $n.ts_domain -}}
+# Managed by chezmoi from private_dot_ssh/private_config.tmpl. This file holds
+# the structure only. Every host name, domain and address comes from
+# [data.net] and [data.ssh] in ~/.config/chezmoi/chezmoi.toml, which is not
+# version controlled, because the dotfiles repo is public.
+#
+# Name strategy: a bare short name first prefers its mDNS .local name when one
+# answers on the current link (see the probe block below), then canonicalizes
+# against the LAN domain, which only resolves at home, and finally against the
+# tailnet, which works from anywhere. Short names and FQDNs converge on the
+# same canonical hostname, so the Match final blocks apply identically to both.
+#
+# Reachability tests use hostprobe rather than nc, whose connect-timeout flag
+# is -G on BSD and -w on GNU. That is what lets this file be one text.
+
+Host *
+{{- with (index .ssh "identity_agent") }}
+  IdentityAgent {{ . | quote }}
+{{- end }}
+  # SetEnv TERM=xterm-256color
+  SendEnv TERM_PROGRAM
+  ServerAliveInterval 30
+  ServerAliveCountMax 3
+  ConnectTimeout 15
+  CanonicalizeHostname yes
+  CanonicalizeMaxDots 0
+  CanonicalizeFallbackLocal yes
+  CanonicalDomains {{ $lan }} {{ $ts }}
+
+# Prefer a host's mDNS name when it answers on the current link. This is the
+# `local` tier of CanonicalDomains without the resolver's negative timeout,
+# measured at 5.0s for every absent name on both mDNSResponder and avahi:
+# hostprobe bounds the query at 500ms and ssh falls through to CanonicalDomains
+# above on a miss. The deadline has to clear a cold query, measured at
+# 189-252ms, not the few ms a cached one takes. `!*.*` limits this to bare
+# short names, mirroring CanonicalizeMaxDots 0, so FQDNs and IPs are untouched.
+# HostName expands only %h, which is still the name as typed because this is
+# the first block that sets it. The `host` criterion keeps the probe off the
+# second config pass: ssh re-parses the file after canonicalization, and by
+# then `host` is the canonical FQDN, which `!*.*` rejects; without it every
+# miss pays the deadline twice. A missing binary is a failed exec, so a host
+# without hostprobe installed just keeps the pre-mDNS behaviour.
+Match originalhost "*,!*.*" host "*,!*.*" exec "{{ $probe }} %n.local"
+  Hostname %h.local
+{{ with (index .ssh "hosts") }}
+{{ . }}
+{{- end }}
+{{- if ne .chezmoi.hostname $n.jump }}
+
+# LAN-only targets: connect direct when reachable, otherwise jump. Omitted on
+# the jump host itself, where it would name that host as its own jump.
+Match final host "{{ $n.lan_only }}" !exec "{{ $probe }} -c 22 %h"
+  ProxyJump {{ $n.jump }}
+{{- end }}
+
+# ForwardAgent must be decided in the first config pass: the trailing `Host *`
+# sets ForwardAgent no, and first-obtained wins before any Match final block
+# runs. Patterns cover typed short names and FQDNs.
+Match host "{{ $n.agent }},*.local,*.{{ $lan }},*.{{ $ts }}"
+  ForwardAgent yes
+
+# Stable machines: track host keys without first-use prompts
+Match final host "{{ $n.stable }}"
+  StrictHostKeyChecking accept-new
+  UserKnownHostsFile ~/.ssh/known_hosts.home
+
+# mDNS names are link-local, so on a foreign network any device can claim one
+# (pi.local is the Raspberry Pi factory default). Unlike the block below,
+# .local keeps real host key tracking and a visible log level so a hijacked
+# name fails loudly. Hosts already named above keep their settings; this
+# covers the rest.
+Match final host "*.local"
+  StrictHostKeyChecking accept-new
+  UserKnownHostsFile ~/.ssh/known_hosts.home
+  LogLevel ERROR
+
+# Everything on the LAN or tailnet, typed short or as FQDN
+Match final host "{{ $n.shared }},*.local,*.{{ $lan }},*.{{ $ts }}"
+  ForwardAgent yes
+  StrictHostKeyChecking no
+  UserKnownHostsFile /dev/null
+  LogLevel QUIET
+  ControlMaster auto
+  ControlPath ~/.ssh/sockets/%C
+  ControlPersist 600
+
+Match final host "{{ $n.login }}"
+  User {{ $n.user }}
+{{- if ne .chezmoi.hostname $n.jump }}
+
+# Hosts behind the jump host's subnet: direct when it answers, jumped
+# otherwise. Omitted on the jump host, which fronts that subnet.
+Match final host {{ $n.jump_subnet }} !exec "{{ $probe }} -c 22 %h"
+  ProxyJump {{ $n.jump }}
+{{- end }}
+{{- with (index .ssh "extra") }}
+
+{{ . }}
+{{- end }}
+{{- end }}
 
 Host *
   ForwardAgent no
