@@ -97,13 +97,6 @@ Match final host "{{ $n.shared }},*.local,*.{{ $lan }},*.{{ $ts }}"
 
 Match final host "{{ $n.login }}"
   User {{ $n.user }}
-{{- if ne .chezmoi.hostname $n.jump }}
-
-# Hosts behind the jump host's subnet: direct when it answers, jumped
-# otherwise. Omitted on the jump host, which fronts that subnet.
-Match final host {{ $n.jump_subnet }} !exec "{{ $probe }} -c 22 %h"
-  ProxyJump {{ $n.jump }}
-{{- end }}
 {{- with (index .ssh "extra") }}
 
 {{ . }}
