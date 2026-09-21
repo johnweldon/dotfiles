@@ -11,7 +11,7 @@
 # Why it exists: putting `local` in ssh's CanonicalDomains makes every lookup
 # for a host that is not on the current link pay mDNSResponder's full negative
 # timeout, measured at 5.0s on macOS. Bounding the query instead costs ~18ms on
-# a hit and ~265ms on a miss at the default 250ms deadline.
+# a hit and ~515ms on a miss at the default 500ms deadline.
 #
 # Darwin only. The dns_sd API is in libSystem here and needs no linker flags; on
 # Linux it would require avahi-compat-libdns_sd. ssh treats a missing binary as
@@ -72,7 +72,13 @@ static void cb(DNSServiceRef ref, DNSServiceFlags flags, uint32_t ifindex,
 }
 
 int main(int argc, char **argv) {
-	long ms = 250;
+	/*
+	 * Cold queries on a quiet link measured 189-252ms across four trials
+	 * spaced past the 120s mDNS cache TTL; warm ones answer in 1ms. 250ms
+	 * sat on top of that distribution and intermittently missed a host that
+	 * was present, so allow roughly 2x the observed worst case.
+	 */
+	long ms = 500;
 	int i = 1;
 
 	if (argc > 2 && argv[1][0] == '-' && argv[1][1] == 't') {
