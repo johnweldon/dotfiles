@@ -15,7 +15,7 @@
 #   cleanpath       jw4/tcleanpath              5dbcb02e  2025-06-18
 #   jot             jw4/jot                     250395aa  2026-09-21
 #   list-git-repos  johnweldon/list-git-repos   e6694cb1  2026-08-14
-#   statusline      johnweldon/statusline       44e41042  2026-06-06
+#   statusline      johnweldon/statusline       938b1ecf  2026-09-23
 
 set -euo pipefail
 
@@ -33,7 +33,7 @@ TOOLS="
 cleanpath|https://github.com/jw4/tcleanpath.git|5dbcb02eecb55de8d18b4d72f44bd4c2f037a37b|cleanpath
 jot|https://github.com/jw4/jot.git|250395aaa5254c0966a7d05f92e49e916838d6f6|jot
 list-git-repos|https://github.com/johnweldon/list-git-repos.git|e6694cb179c9c1f6b92056e95cb873852e3741f6|list-git-repos
-statusline|https://github.com/johnweldon/statusline.git|44e41042dc02891cfd0f2b313b77cd8ebfa3b44f|statusline
+statusline|https://github.com/johnweldon/statusline.git|938b1ecfd1cddfeef4071fc24622de7a95b5e027|statusline
 "
 
 note() { printf 'build-c-tools: %s\n' "$*"; }
