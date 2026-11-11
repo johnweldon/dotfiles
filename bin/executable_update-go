@@ -2,7 +2,7 @@
 
 set -eou pipefail
 
-if ! sudo -vN; then
+if ! sudo -n true; then
   echo "sudo is not configured to allow running commands without a password"
   exit 1
 fi
