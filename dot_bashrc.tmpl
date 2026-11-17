@@ -82,9 +82,30 @@ fi
 
 {{ end -}}
 
+# Source a tool's generated shell hook from a cache: `_cached_hook TOOL CMD...`
+# runs CMD to regenerate it whenever TOOL's binary is newer than the cache.
+# Each `eval "$(tool ...)"` otherwise costs a fork (~13ms here) on every shell.
+_cached_hook() {
+  local name=$1 bin cache
+  shift
+  bin=$(type -P "${name}") || return 0
+  cache="${XDG_CACHE_HOME:-${HOME}/.cache}/bash-hooks/${name}.bash"
+  if [ ! -s "${cache}" ] || [ "${bin}" -nt "${cache}" ]; then
+    mkdir -p "${cache%/*}"
+    "$@" 2>/dev/null >|"${cache}" || return 0
+  fi
+  # shellcheck disable=SC1090
+  . "${cache}"
+}
+
 # fzf key bindings (Ctrl-R history, Ctrl-T files, Alt-C cd). `fzf --bash`
-# needs fzf 0.48+; older versions print nothing to stdout.
-(command -v fzf >/dev/null 2>&1) && eval "$(fzf --bash 2>/dev/null)"
+# needs fzf 0.48+; older versions print nothing to stdout. Only the key-binding
+# half is kept: the `**<Tab>` completion half wraps every existing completion
+# and costs ~75ms per shell. Output without the marker is kept whole.
+# shellcheck disable=SC2329 # invoked indirectly by _cached_hook
+_fzf_key_bindings() { fzf --bash | sed '/^### end: key-bindings.bash ###/q'; }
+_cached_hook fzf _fzf_key_bindings
+unset -f _fzf_key_bindings
 
 if [ -f ~/.bash_prompt ]; then
   # shellcheck disable=SC1090,SC1091
@@ -143,4 +164,5 @@ function start_ssh_agent() {
 [ ! -f "{{ .chezmoi.homeDir }}/.ssh/noagent" ] && start_ssh_agent || true
 
 # according to man page should be near end of bashrc
-(command -v direnv >/dev/null 2>&1) && eval "$(direnv hook bash)"
+_cached_hook direnv direnv hook bash
+unset -f _cached_hook
