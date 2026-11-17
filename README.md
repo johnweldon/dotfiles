@@ -70,10 +70,47 @@ When `profile = "minimal"`, the following are not deployed (see [`.chezmoiignore
 - `.vnc`
 - the Linux package check (`52-check-packages.sh`)
 - `Documents/PowerShell`
+- the Linux desktop login apps (see [Linux desktop login apps](#linux-desktop-login-apps))
 
 Everything else -- shell, git config and aliases, vim, ssh, and the `git-*-all` helper scripts -- installs in both profiles.
 
 Note: the promoted `git-*-all` scripts and `bin/git_helpers.py` require `python3` on the target box.
+
+## Linux desktop login apps
+
+On a full-profile Linux desktop running GNOME (or any desktop that honours XDG autostart), these open at login:
+
+- Slack
+- one Chrome window per listed profile, 3 seconds apart
+- a kitty window running `ssh <ssh_host>`, falling back to a local shell if ssh exits or the network is not up yet, plus a second kitty window with a local shell in `~`
+
+The login session's `SSH_AUTH_SOCK` also points at the systemd user ssh-agent (`ssh-agent.socket`), so GUI apps share the agent your shells use.
+
+They deploy only on hosts whose private `~/.config/chezmoi/chezmoi.toml` has a `[data.desktop]` table. Host and profile names live there rather than in this public repo. Every other host, including macOS and the minimal profile, ignores `.config/autostart`, `.config/environment.d` and `.config/kitty` entirely.
+
+To enable it on a desktop, add the table under `[data]` and apply:
+
+```toml
+  [data.desktop]
+    # Host for the first kitty window; empty opens only the local shell.
+    ssh_host = "myhost"
+    # Chrome profile directories, as named under ~/.config/google-chrome.
+    chrome_profiles = ["Default", "Profile 1"]
+```
+
+```bash
+chezmoi apply
+```
+
+Then make Chrome reopen your tabs. The autostart entry only opens a window per profile; what that window shows is a Chrome setting that chezmoi cannot write, because Chrome rejects outside edits to it. In each profile, open `chrome://settings/onStartup` and choose "Continue where you left off".
+
+To list your profile directories and the names Chrome shows for them:
+
+```bash
+jq -r '.profile.info_cache | to_entries[] | "\(.key)\t\(.value.name)"' ~/.config/google-chrome/"Local State"
+```
+
+The entries expect `/usr/bin/slack`, `/usr/bin/google-chrome` and kitty at `~/.local/kitty.app/bin/kitty`. An entry whose program is missing is skipped. To try the kitty windows without logging out, run `gtk-launch kitty-desktop`. To stop one app opening, delete its file from `~/.config/autostart`; it comes back on the next `chezmoi apply` unless you also remove it from the repo.
 
 ## Notes
 
