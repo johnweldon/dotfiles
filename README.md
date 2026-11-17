@@ -82,7 +82,7 @@ On a full-profile Linux desktop running GNOME (or any desktop that honours XDG a
 
 - Slack
 - one Chrome window per listed profile, 3 seconds apart
-- a kitty window running `ssh <ssh_host>`, falling back to a local shell if ssh exits or the network is not up yet, plus a second kitty window with a local shell in `~`
+- a kitty window running `ssh <ssh_host>`, attached to tmux session `<ssh_tmux_session>` when that is set, falling back to a local shell if ssh exits or the network is not up yet, plus a second kitty window with a local shell in `~`
 
 The login session's `SSH_AUTH_SOCK` also points at the systemd user ssh-agent (`ssh-agent.socket`), so GUI apps share the agent your shells use.
 
@@ -94,6 +94,8 @@ To enable it on a desktop, add the table under `[data]` and apply:
   [data.desktop]
     # Host for the first kitty window; empty opens only the local shell.
     ssh_host = "myhost"
+    # Optional: tmux session on ssh_host to reattach at every login.
+    ssh_tmux_session = "main"
     # Chrome profile directories, as named under ~/.config/google-chrome.
     chrome_profiles = ["Default", "Profile 1"]
 ```

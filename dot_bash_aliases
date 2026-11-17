@@ -37,3 +37,11 @@ alias jot='jot -d -r "${NOTES_DIR:-$HOME/notes/}" -s .md'
 alias k='kubectl'
 alias python='python3'
 alias tf='terraform'
+
+# Debian and Ubuntu install bat and fd as batcat and fdfind.
+if ! command -v bat >/dev/null 2>&1 && command -v batcat >/dev/null 2>&1; then
+  alias bat='batcat'
+fi
+if ! command -v fd >/dev/null 2>&1 && command -v fdfind >/dev/null 2>&1; then
+  alias fd='fdfind'
+fi

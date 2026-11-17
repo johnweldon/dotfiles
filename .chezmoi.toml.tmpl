@@ -151,6 +151,9 @@
   [data.desktop]
     # Host for the first kitty window; empty opens only a local shell.
     ssh_host = {{ index . "ssh_host" | default "" | quote }}
+    # tmux session on ssh_host to attach (created if missing); empty for a
+    # plain shell.
+    ssh_tmux_session = {{ index . "ssh_tmux_session" | default "" | quote }}
     # Chrome profile directories to open, e.g. "Default", "Profile 1".
     chrome_profiles = [{{ range (index . "chrome_profiles" | default list) }}{{ . | quote }}, {{ end }}]
 {{- end }}

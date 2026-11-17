@@ -32,7 +32,8 @@ HISTTIMEFORMAT='%F %T '
 shopt -s checkwinsize
 
 set -o vi
-set -o ignoreeof
+# A single Ctrl-D is ignored; a second one in a row exits.
+IGNOREEOF=1
 set -o noclobber
 
 # make less more friendly for non-text input files, see lesspipe(1). These
@@ -168,4 +169,6 @@ function start_ssh_agent() {
 
 # according to man page should be near end of bashrc
 _cached_hook direnv direnv hook bash
+# zoxide: `z <part of a path>` jumps to the most used matching directory.
+_cached_hook zoxide zoxide init bash
 unset -f _cached_hook

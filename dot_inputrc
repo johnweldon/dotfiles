@@ -15,3 +15,9 @@ set mark-symlinked-directories on
 # mapping to have [Tab] and [Shift]+[Tab] to cycle through all the possible completions:
 "\t": menu-complete
 "\e[Z": menu-complete-backward
+
+# Ctrl-L clears the screen in vi insert mode too (emacs mode has it already).
+# It keeps scrollback, unlike `clear`.
+set keymap vi-insert
+"\C-l": clear-screen
+set keymap emacs

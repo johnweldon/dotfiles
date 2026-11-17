@@ -1,9 +1,11 @@
 # Managed by chezmoi. Opened at login by ~/.config/autostart/kitty-desktop.desktop.
+{{- $tmux := index .desktop "ssh_tmux_session" | default "" }}
 {{- with (index .desktop "ssh_host") }}
 
-# First OS window: {{ . }}. --hold leaves a local shell if ssh exits or fails,
-# for example when the network is not up yet at login.
-launch --hold --title {{ . }} ssh {{ . }}
+# First OS window: {{ . }}{{ if $tmux }}, reattaching tmux session "{{ $tmux }}" (created
+# if missing){{ end }}. --hold leaves a local shell if ssh exits or fails, for
+# example when the network is not up yet at login.
+launch --hold --title {{ . }} ssh {{ if $tmux }}-t {{ . }} tmux new -A -s {{ $tmux }}{{ else }}{{ . }}{{ end }}
 
 new_os_window
 {{- end }}
