@@ -4,10 +4,12 @@ Documents
 README.md
 CLAUDE.md
 .claude
-{{ if or (ne .chezmoi.os "linux") (not (hasKey . "desktop")) -}}
+{{/* Desktop login apps: full-profile Linux hosts with a private
+       [data.desktop] table only. */ -}}
+{{ if or (ne .chezmoi.os "linux") (not (hasKey . "desktop")) (and (hasKey . "profile") (eq .profile "minimal")) -}}
 .config/autostart
 .config/environment.d
-.config/kitty/desktop.kitty-session
+.config/kitty
 {{ end -}}
 {{ if and (hasKey . "profile") (eq .profile "minimal") -}}
 bin/brew-upgrade
