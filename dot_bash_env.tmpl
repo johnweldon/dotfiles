@@ -28,14 +28,23 @@ export PATH
 # shellcheck disable=SC1090,SC1091
 [ -f "${HOME}/.local/bin/env" ] && . "${HOME}/.local/bin/env"
 
+{{- /* en_US.UTF-8 unless this Linux host lacks it, as minimal images do,
+       where C.UTF-8 avoids bash's setlocale warning on every shell. Decided at
+       apply time, so a host that generates the locale later needs a reapply. */ -}}
+{{- $lang := "en_US.UTF-8" -}}
+{{- if and (eq .chezmoi.os "linux") (lookPath "locale") -}}
+{{-   if not (output "locale" "-a" | regexMatch "(?im)^en_US\\.utf-?8$") -}}
+{{-     $lang = "C.UTF-8" -}}
+{{-   end -}}
+{{- end }}
 # LANG, not LC_ALL: LC_ALL overrides every category and ssh's default
 # `SendEnv LC_*` would push it to hosts that may not have the locale.
-export LANG="en_US.UTF-8"
+export LANG="{{ $lang }}"
 unset LC_ALL
 # macOS Terminal sets LC_CTYPE=UTF-8, which is not a locale name on Linux, and
 # ssh forwards it. Exporting LC_ALL used to mask that.
 if [ "${LC_CTYPE:-}" = "UTF-8" ]; then
-  LC_CTYPE="en_US.UTF-8"
+  LC_CTYPE="{{ $lang }}"
   export LC_CTYPE
 fi
 export LESSCHARSET='UTF-8'

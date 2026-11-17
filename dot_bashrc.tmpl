@@ -116,15 +116,11 @@ fi
 [ -f "${HOME}/.local.bashrc" ] && source "${HOME}/.local.bashrc"
 
 function start_ssh_agent() {
-  # Keep an agent that is already reachable: a forwarded one, the systemd user
-  # socket ~/.bash_env selects on Linux, or launchd's on macOS. `ssh-add -l`
-  # exits 2 only when it cannot reach an agent at all.
-  if [ -S "${SSH_AUTH_SOCK:-}" ]; then
-    ssh-add -l >/dev/null 2>&1
-    [ $? -ne 2 ] && return 0
-  fi
   # shellcheck disable=SC1090,SC1091
   (command -v ssh-agent >/dev/null 2>&1) && {
+    # keychain hosts always use the keychain agent, even when a forwarded one
+    # is live: cron jobs find it through ~/.keychain/${HOSTNAME}-sh, so an
+    # interactive login has to keep it running and loaded.
     if command -v keychain >/dev/null 2>&1; then {
       # Reuse a live agent when there is one: the keychain scan costs ~150ms
       # and would otherwise run on every shell, including every tmux window.
@@ -137,6 +133,13 @@ function start_ssh_agent() {
       fi
     }; else
       {
+        # Keep an agent that is already reachable: a forwarded one, the systemd
+        # user socket ~/.bash_env selects on Linux, or launchd's on macOS.
+        # `ssh-add -l` exits 2 only when it cannot reach an agent at all.
+        if [ -S "${SSH_AUTH_SOCK:-}" ]; then
+          ssh-add -l >/dev/null 2>&1
+          [ $? -ne 2 ] && return 0
+        fi
         # Use flock to prevent race conditions when multiple shells start simultaneously
         local lockfile="${HOME}/.ssh/agent.lock"
         (
