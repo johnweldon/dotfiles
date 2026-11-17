@@ -12,8 +12,14 @@
   {{- end }}
 {{- end }}
 
+{{- /* [data.ssh].github_keys = false pins this host to the listed keys, so a
+       key added to the GitHub account no longer reaches it on the next apply.
+       Defaults to true because fresh boxes bootstrap from the GitHub keys. */ -}}
+{{- $useGitHub := true -}}
+{{- with (index . "ssh") }}{{ if hasKey . "github_keys" }}{{ $useGitHub = .github_keys }}{{ end }}{{ end -}}
+
 {{- with (index . "user") }}
-  {{- with (index . "github") }}
+  {{- with (and $useGitHub (index . "github")) }}
     {{- range (gitHubKeys .) }}
       {{- $keys = append $keys .Key }}
     {{- end }}

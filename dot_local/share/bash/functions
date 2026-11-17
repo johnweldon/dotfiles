@@ -63,7 +63,7 @@ function execute_remote_command {
       # stdout/stderr stream live through their own awk (fflush so output is
       # not block-buffered when piped/logged), prefixed and aligned per host.
       local rc=0
-      ssh -A -T -q -o BatchMode=yes -o ConnectTimeout=10 \
+      ssh -T -q -o BatchMode=yes -o ConnectTimeout=10 \
         -o ServerAliveInterval=30 -o ServerAliveCountMax=3 \
         "${rhost}" "${remote_command}" \
         1> >(awk -v p="${rhost}" -v w="${max_width}" -v d="${dim_white}" -v c="${green}" -v r="${reset}" \

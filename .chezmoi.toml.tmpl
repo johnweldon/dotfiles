@@ -13,6 +13,7 @@
 {{- end -}}
 
 {{- $noagent := true -}}
+{{- $github_keys := true -}}
 {{- $authorized_keys := "" -}}
 {{- $config := "" -}}
 {{- $managed := false -}}
@@ -21,6 +22,7 @@
 
 {{- with (index . "ssh") -}}
 {{-   if hasKey . "no_agent" -}}{{- $noagent = (index . "no_agent") -}}{{- end -}}
+{{-   if hasKey . "github_keys" -}}{{- $github_keys = (index . "github_keys") -}}{{- end -}}
 {{-   with (index . "authorized_keys") -}}{{- $authorized_keys = . -}}{{- end -}}
 {{-   with (index . "config") -}}{{- $config = . -}}{{- end -}}
 {{-   if hasKey . "managed" -}}{{- $managed = (index . "managed") -}}{{- end -}}
@@ -123,6 +125,9 @@
     # false regardless, and also skips building hostprobe.
     managed = {{ $managed }}
     no_agent = {{ $noagent }}
+    # false: authorized_keys holds only the keys listed below, never the
+    # GitHub account's. Set it once those keys are listed here.
+    github_keys = {{ $github_keys }}
     authorized_keys = [{{ with $authorized_keys}}{{ range . }}
       {{ . | quote }},{{ end }}
     {{ end }}]

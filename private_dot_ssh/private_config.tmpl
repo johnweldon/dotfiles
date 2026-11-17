@@ -25,6 +25,7 @@
 {{- $stable := join "," $n.stable -}}
 {{- $login := concat $n.stable $n.login_also $n.ephemeral | join "," -}}
 {{- $shared := concat $n.exclude (list $n.lan_cidr) $n.ephemeral $n.shared_also | join "," -}}
+{{- $lanKeyed := concat $n.exclude (list (printf "*.%s" $lan)) | join "," -}}
 # Managed by chezmoi from private_dot_ssh/private_config.tmpl. This file holds
 # the structure only. Every host name, domain and address comes from
 # [data.net] and [data.ssh] in ~/.config/chezmoi/chezmoi.toml, which is not
@@ -52,6 +53,11 @@ Host *
   CanonicalizeMaxDots 0
   CanonicalizeFallbackLocal yes
   CanonicalDomains {{ $lan }} {{ $ts }}
+{{- if not (index .ssh "identity_agent") }}
+  # Load a key into the agent on first use instead of from shell startup.
+  # Skipped when a password manager's agent owns the keys.
+  AddKeysToAgent yes
+{{- end }}
 
 # Prefer a host's mDNS name when it answers on the current link. This is the
 # `local` tier of CanonicalDomains without the resolver's negative timeout,
@@ -82,7 +88,17 @@ Match final host "{{ $n.lan_only }}" !exec "{{ $probe }} -c 22 %h"
 # ForwardAgent must be decided in the first config pass: the trailing `Host *`
 # sets ForwardAgent no, and first-obtained wins before any Match final block
 # runs. Patterns cover typed short names and FQDNs.
-Match host "{{ $agent }},*.local,*.{{ $lan }},*.{{ $ts }}"
+#
+# `*.local` is deliberately absent. `host` already sees the probe block's
+# HostName, so with it any unlisted short name that answers mDNS, which on a
+# foreign network can be any device, would get the agent. `originalhost`
+# matches the name as typed, so listed hosts keep forwarding when the probe
+# rewrites them to .local; `host` still covers aliases whose HostName is a LAN
+# address or FQDN.
+Match originalhost "{{ $agent }},*.{{ $lan }},*.{{ $ts }}"
+  ForwardAgent yes
+
+Match host "{{ $agent }},*.{{ $lan }},*.{{ $ts }}"
   ForwardAgent yes
 
 # Machines whose host keys are worth tracking, plus every mDNS name. Unlike
@@ -95,11 +111,24 @@ Match final host "{{ $stable }},*.local"
   UserKnownHostsFile ~/.ssh/known_hosts.home
   LogLevel ERROR
 
-# Everything on the LAN or tailnet, typed short or as FQDN
-Match final host "{{ $shared }},*.local,*.{{ $lan }},*.{{ $ts }}"
+# Rebuilt or address-typed targets, plus the tailnet, whose peers WireGuard
+# already authenticates: skip host key tracking. Ahead of the LAN block below
+# so ephemeral hosts keep this when they canonicalize into the LAN domain.
+Match final host "{{ $shared }},*.{{ $ts }}"
   StrictHostKeyChecking no
   UserKnownHostsFile /dev/null
   LogLevel QUIET
+
+# Any other LAN name. LAN DNS is spoofable and these hosts get the agent, so
+# track their keys too; add a host that gets rebuilt to `ephemeral` instead.
+# `exclude` keeps its hosts on the default known_hosts and strict checking.
+Match final host "{{ $lanKeyed }}"
+  StrictHostKeyChecking accept-new
+  UserKnownHostsFile ~/.ssh/known_hosts.home
+  LogLevel ERROR
+
+# Everything on the LAN or tailnet, typed short or as FQDN
+Match final host "{{ $shared }},*.local,*.{{ $lan }},*.{{ $ts }}"
   ControlMaster auto
   ControlPath ~/.ssh/sockets/%C
   ControlPersist 600
