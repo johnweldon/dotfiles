@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=kitty desktop session
+Comment=kitty windows from ~/.config/kitty/desktop.kitty-session
+Exec={{ .chezmoi.homeDir }}/.local/kitty.app/bin/kitty --session {{ .chezmoi.homeDir }}/.config/kitty/desktop.kitty-session
+TryExec={{ .chezmoi.homeDir }}/.local/kitty.app/bin/kitty
+X-GNOME-Autostart-enabled=true
+X-GNOME-Autostart-Delay=5

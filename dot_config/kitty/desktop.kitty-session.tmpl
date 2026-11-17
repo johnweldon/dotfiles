@@ -1,0 +1,13 @@
+# Managed by chezmoi. Opened at login by ~/.config/autostart/kitty-desktop.desktop.
+{{- with (index .desktop "ssh_host") }}
+
+# First OS window: {{ . }}. --hold leaves a local shell if ssh exits or fails,
+# for example when the network is not up yet at login.
+launch --hold --title {{ . }} ssh {{ . }}
+
+new_os_window
+{{- end }}
+
+# A local shell in the home directory.
+cd ~
+launch

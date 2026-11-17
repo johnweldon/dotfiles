@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Slack
+Exec=/usr/bin/slack
+TryExec=/usr/bin/slack
+X-GNOME-Autostart-enabled=true

@@ -4,6 +4,11 @@ Documents
 README.md
 CLAUDE.md
 .claude
+{{ if or (ne .chezmoi.os "linux") (not (hasKey . "desktop")) -}}
+.config/autostart
+.config/environment.d
+.config/kitty/desktop.kitty-session
+{{ end -}}
 {{ if and (hasKey . "profile") (eq .profile "minimal") -}}
 bin/brew-upgrade
 bin/pdftostdout

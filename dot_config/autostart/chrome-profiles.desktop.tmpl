@@ -1,0 +1,17 @@
+{{- /* One window per profile in [data.desktop].chrome_profiles, 3s apart so
+       the launches do not race for Chrome's single-instance lock. Each
+       profile restores its tabs if its "On startup" setting is "Continue
+       where you left off". Renders empty, so chezmoi skips it, without
+       profiles. */ -}}
+{{- $cmds := list -}}
+{{- range (index .desktop "chrome_profiles" | default list) -}}
+{{-   $cmds = append $cmds (printf "/usr/bin/google-chrome '--profile-directory=%s'" .) -}}
+{{- end -}}
+{{- if $cmds -}}
+[Desktop Entry]
+Type=Application
+Name=Chrome profiles
+Exec=sh -c "{{ join " & sleep 3; " $cmds }}"
+TryExec=/usr/bin/google-chrome
+X-GNOME-Autostart-enabled=true
+{{ end -}}
