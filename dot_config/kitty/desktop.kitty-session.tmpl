@@ -4,8 +4,10 @@
 
 # First OS window: {{ . }}{{ if $tmux }}, reattaching tmux session "{{ $tmux }}" (created
 # if missing){{ end }}. --hold leaves a local shell if ssh exits or fails, for
-# example when the network is not up yet at login.
-launch --hold --title {{ . }} ssh {{ if $tmux }}-t {{ . }} tmux new -A -s {{ $tmux }}{{ else }}{{ . }}{{ end }}
+# example when the network is not up yet at login. The key is loaded before
+# connecting: a passphrase prompt from ssh itself is cut off when the server's
+# LoginGraceTime (120s) runs out, while ssh-add's waits as long as it takes.
+launch --hold --title {{ . }} sh -c 'ssh-add -l >/dev/null 2>&1 || ssh-add; exec ssh {{ if $tmux }}-t {{ . }} tmux new -A -s {{ $tmux }}{{ else }}{{ . }}{{ end }}'
 
 new_os_window
 {{- end }}
