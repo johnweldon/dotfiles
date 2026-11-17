@@ -38,6 +38,16 @@ alias k='kubectl'
 alias python='python3'
 alias tf='terraform'
 
+# `gi ts` -> `git s`: the "t" of git typed after the space. Strips a leading
+# t from the subcommand, so `gi tl` and `gi tadd` work too.
+gi() {
+  if [ $# -gt 0 ]; then
+    git "${1#t}" "${@:2}"
+  else
+    git
+  fi
+}
+
 # Debian and Ubuntu install bat and fd as batcat and fdfind.
 if ! command -v bat >/dev/null 2>&1 && command -v batcat >/dev/null 2>&1; then
   alias bat='batcat'
