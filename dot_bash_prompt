@@ -39,25 +39,6 @@ WHITE="\[\033[0;37m\]"
 LIGHT_WHITE="\[\033[1;37m\]"
 COLOR_NONE="\[\e[0m\]"
 
-function swatch() {
-  echo "black${BLACK}black${COLOR_NONE}"
-  echo "light black${LIGHT_BLACK}light black${COLOR_NONE}"
-  echo "red${RED}red${COLOR_NONE}"
-  echo "light red${LIGHT_RED}light red${COLOR_NONE}"
-  echo "green${GREEN}green${COLOR_NONE}"
-  echo "light green${LIGHT_GREEN}light green${COLOR_NONE}"
-  echo "yellow${YELLOW}yellow${COLOR_NONE}"
-  echo "light yellow${LIGHT_YELLOW}light yellow${COLOR_NONE}"
-  echo "blue${BLUE}blue${COLOR_NONE}"
-  echo "light blue${LIGHT_BLUE}light blue${COLOR_NONE}"
-  echo "purple${PURPLE}purple${COLOR_NONE}"
-  echo "light purple${LIGHT_PURPLE}light purple${COLOR_NONE}"
-  echo "cyan${CYAN}cyan${COLOR_NONE}"
-  echo "light cyan${LIGHT_CYAN}light cyan${COLOR_NONE}"
-  echo "white${WHITE}white${COLOR_NONE}"
-  echo "light white${LIGHT_WHITE}light white${COLOR_NONE}"
-}
-
 # Determine branch name and dirty state for the current git repository in a
 # single `git status` call.
 function set_git_branch() {
@@ -129,13 +110,20 @@ function set_date_prompt() {
 # Set the full bash prompt.
 if command -v bashline >/dev/null 2>&1; then
   set_bash_prompt() {
+    # PS1 reads $? after PROMPT_COMMAND runs, so hand the command's status back.
+    local rc=$?
+    history -a
     PS1='$(bashline --exit-code=$? --shlvl=$SHLVL --jobs=\j)'
+    return "${rc}"
   }
 else
   set_bash_prompt() {
     # Set the PROMPT_SYMBOL variable. We do this first so we don't lose the
     # return value of the last command.
     set_prompt_symbol $?
+
+    # Append this command to $HISTFILE now rather than at exit.
+    history -a
 
     # Set the PYTHON_VIRTUALENV variable.
     set_virtualenv

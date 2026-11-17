@@ -15,4 +15,5 @@ build/data/Brewfile
 Documents/PowerShell
 50-build-c-tools.sh
 51-build-hostprobe.sh
+52-check-packages.sh
 {{ end -}}

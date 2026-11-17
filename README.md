@@ -68,6 +68,7 @@ When `profile = "minimal"`, the following are not deployed (see [`.chezmoiignore
 - `.astylerc`
 - `.config/nvim` (Neovim/LazyVim), `.config/markdownlint-cli2.yaml`
 - `.vnc`
+- the Linux package check (`52-check-packages.sh`)
 - `Documents/PowerShell`
 
 Everything else -- shell, git config and aliases, vim, ssh, and the `git-*-all` helper scripts -- installs in both profiles.

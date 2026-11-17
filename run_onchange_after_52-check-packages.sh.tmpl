@@ -1,0 +1,43 @@
+{{ if eq .chezmoi.os "linux" -}}
+#!/usr/bin/env bash
+#
+# Report tools these dotfiles use that this Linux host lacks. It only reports:
+# installing needs sudo and a package manager guess. macOS gets the same tools
+# from build/data/Brewfile. Runs again whenever the list below changes.
+
+set -euo pipefail
+
+# binary names (any one satisfies) | Debian/Ubuntu package
+TOOLS="
+bat batcat|bat
+delta|git-delta
+direnv|direnv
+fd fdfind|fd-find
+fzf|fzf
+jq|jq
+rg|ripgrep
+shellcheck|shellcheck
+ssh-audit|ssh-audit
+"
+
+missing=()
+while IFS='|' read -r bins pkg; do
+  [ -n "${bins}" ] || continue
+  found=0
+  for b in ${bins}; do
+    if command -v "${b}" >/dev/null 2>&1; then
+      found=1
+      break
+    fi
+  done
+  [ "${found}" = 1 ] || missing+=("${pkg}")
+done <<<"${TOOLS}"
+
+if [ "${#missing[@]}" -gt 0 ]; then
+  printf 'check-packages: missing on %s: %s\n' "$(uname -n)" "${missing[*]}"
+  if command -v apt-get >/dev/null 2>&1; then
+    printf 'check-packages: sudo apt install %s\n' "${missing[*]}"
+  fi
+fi
+exit 0
+{{ end -}}

@@ -5,7 +5,8 @@
 
 # ls Aliases
 
-if command ls --help 2>&1 | grep -q -- --color; then
+# GNU ls, and BSD ls on macOS 13+, accept --color; older BSD ls takes -G.
+if command ls --color=auto -d / >/dev/null 2>&1; then
   alias ls='\ls --color=auto -F'
 else
   alias ls='\ls -CFG'
@@ -35,4 +36,3 @@ alias jot='jot -d -r "${NOTES_DIR:-$HOME/notes/}" -s .md'
 alias k='kubectl'
 alias python='python3'
 alias tf='terraform'
-alias tmux='tmux -2u'

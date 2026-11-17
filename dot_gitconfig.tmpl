@@ -13,7 +13,20 @@
 {{ end -}}
 [core]
 	excludesfile = ~/.local.gitignore
-	ignorecase = false
+	ignorecase = false{{ if lookPath "delta" }}
+	pager = delta
+
+[interactive]
+	diffFilter = delta --color-only
+
+[delta]
+	navigate = true{{ end }}
+
+[branch]
+	sort = -committerdate
+
+[commit]
+	verbose = true
 
 [init]
 	defaultBranch = main
@@ -22,7 +35,7 @@
 	sort = version:refname
 
 [fetch]
-	fsckobjects = true
+	prune = true
 	writeCommitGraph = true
 
 [pull]
@@ -39,7 +52,6 @@
 
 [merge]
 	conflictstyle = zdiff3
-	keepbackup = false
 
 [rerere]
 	enabled = true
@@ -49,16 +61,15 @@
 
 [diff]
 	algorithm = histogram
+	colorMoved = default
 	submodule = log
 
 [diff "pdf"]
 	textconv = pdftostdout
 
+# Covers fetch.fsckObjects and receive.fsckObjects, which fall back to it.
 [transfer]
 	fsckobjects = true
-
-[receive]
-	fsckObjects = true
 
 [status]
 	submoduleSummary = true

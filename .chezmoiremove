@@ -1,0 +1,5 @@
+# Targets that are no longer managed here; chezmoi apply deletes them.
+.vnc/start
+.vnc/xstartup
+bin/irssi-session
+bin/jot

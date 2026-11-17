@@ -1,3 +1,7 @@
+# A ~/.inputrc replaces /etc/inputrc instead of adding to it. macOS has no
+# /etc/inputrc, and readline ignores a missing $include.
+$include /etc/inputrc
+
 set completion-ignore-case On
 set mark-symlinked-directories on
 
