@@ -1,0 +1,116 @@
+# ~/.zshrc - interactive zsh. Deployed only where chezmoi data has shell = "zsh".
+# Environment and PATH: ~/.zshenv (via ~/.bash_env). This file ports the
+# interactive parts of ~/.bashrc, ~/.inputrc and ~/.bash_prompt.
+
+# History: appended as each command runs (bash: histappend plus `history -a`),
+# not shared live between open shells.
+HISTFILE="${HOME}/.zsh_history"
+HISTSIZE=100000
+SAVEHIST=200000
+setopt EXTENDED_HISTORY INC_APPEND_HISTORY HIST_IGNORE_DUPS HIST_IGNORE_SPACE HIST_REDUCE_BLANKS
+
+setopt NO_CLOBBER          # bash: set -o noclobber
+setopt IGNORE_EOF          # bash: IGNOREEOF=1 (zsh still exits on the tenth Ctrl-D)
+setopt INTERACTIVE_COMMENTS
+setopt AUTO_PUSHD PUSHD_IGNORE_DUPS
+
+# Completion: Homebrew's zsh functions, case-insensitive, Tab cycles matches
+# (~/.inputrc: completion-ignore-case, "\t": menu-complete).
+if [[ -z ${HOMEBREW_PREFIX:-} && -x /opt/homebrew/bin/brew ]]; then
+  HOMEBREW_PREFIX=/opt/homebrew
+fi
+if [[ -n ${HOMEBREW_PREFIX:-} && -d ${HOMEBREW_PREFIX}/share/zsh/site-functions ]]; then
+  fpath=("${HOMEBREW_PREFIX}/share/zsh/site-functions" $fpath)
+fi
+autoload -Uz compinit
+mkdir -p "${XDG_CACHE_HOME:-${HOME}/.cache}/zsh"
+compinit -d "${XDG_CACHE_HOME:-${HOME}/.cache}/zsh/zcompdump"
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
+zstyle ':completion:*' menu select
+setopt MENU_COMPLETE
+
+# vi editing (bash: set -o vi) with the ~/.inputrc bindings: Up/Down search
+# history by the typed prefix, Shift-Tab cycles back, Ctrl-L clears in insert mode.
+bindkey -v
+KEYTIMEOUT=1
+autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+for _km in viins vicmd; do
+  bindkey -M "$_km" '^[[A' up-line-or-beginning-search
+  bindkey -M "$_km" '^[[B' down-line-or-beginning-search
+done
+unset _km
+bindkey -M viins '^[[Z' reverse-menu-complete
+bindkey -M viins '^L' clear-screen
+
+# make less more friendly for non-text input files (Linux lesspipe).
+if [[ -x /usr/bin/lesspipe ]]; then
+  export LESSOPEN="| /usr/bin/lesspipe %s"
+  export LESSCLOSE="/usr/bin/lesspipe %s %s"
+fi
+
+# Aliases and small functions, shared with bash. `where` there walks bash's
+# DIRSTACK; zsh has a `where` builtin (and `dirs -v`), so drop the alias.
+# shellcheck disable=SC1090,SC1091
+[[ -f ${HOME}/.bash_aliases ]] && source "${HOME}/.bash_aliases"
+unalias where 2>/dev/null
+
+# Source a tool's generated shell hook from a cache: `_cached_hook TOOL CMD...`
+# regenerates it whenever TOOL's binary is newer than the cache.
+_cached_hook() {
+  local name=$1 bin cache
+  shift
+  bin=$(whence -p "$name") || return 0
+  cache="${XDG_CACHE_HOME:-${HOME}/.cache}/zsh-hooks/${name}.zsh"
+  if [[ ! -s $cache || $bin -nt $cache ]]; then
+    mkdir -p "${cache%/*}"
+    "$@" 2>/dev/null >|"$cache" || return 0
+  fi
+  source "$cache"
+}
+
+# fzf key bindings only (Ctrl-R history, Ctrl-T files, Alt-C cd), as in bash.
+_fzf_key_bindings() { fzf --zsh | sed '/^### end: key-bindings.zsh ###/q'; }
+_cached_hook fzf _fzf_key_bindings
+unfunction _fzf_key_bindings
+
+# ssh agent: the keychain agent where keychain is installed (cron jobs find it
+# through ~/.keychain/<host>-sh); otherwise keep any reachable agent (launchd's
+# on macOS, a forwarded one) and start one only when none answers.
+_start_ssh_agent() {
+  command -v ssh-agent >/dev/null 2>&1 || return 0
+  if command -v keychain >/dev/null 2>&1; then
+    [[ -r ${HOME}/.keychain/${HOST}-sh ]] && source "${HOME}/.keychain/${HOST}-sh"
+    if ! ssh-add -l >/dev/null 2>&1; then
+      find "${HOME}/.ssh" -maxdepth 1 -name 'id_*' ! -name '*.pub' -print0 | xargs -0 keychain -q
+      [[ -r ${HOME}/.keychain/${HOST}-sh ]] && source "${HOME}/.keychain/${HOST}-sh"
+    fi
+  else
+    ssh-add -l >/dev/null 2>&1
+    if [[ $? -eq 2 ]]; then
+      eval "$(ssh-agent -s)" >/dev/null
+    fi
+  fi
+}
+[[ -f ${HOME}/.ssh/noagent ]] || _start_ssh_agent
+unfunction _start_ssh_agent
+
+# A plain prompt for now: exit status when non-zero, user@host over ssh, the
+# directory, and the git branch.
+autoload -Uz vcs_info add-zsh-hook
+zstyle ':vcs_info:*' enable git
+zstyle ':vcs_info:git:*' formats ' %F{magenta}(%b)%f'
+zstyle ':vcs_info:git:*' actionformats ' %F{magenta}(%b|%a)%f'
+add-zsh-hook precmd vcs_info
+setopt PROMPT_SUBST
+PROMPT='%(?..%F{red}[%?]%f )${SSH_CONNECTION:+%n@%m:}%F{blue}%~%f${vcs_info_msg_0_} %# '
+
+# Machine-local interactive config (not chezmoi-managed).
+# shellcheck disable=SC1090,SC1091
+[[ -f ${HOME}/.local.zshrc ]] && source "${HOME}/.local.zshrc"
+
+# Shell hooks last: direnv wants to be near the end.
+_cached_hook direnv direnv hook zsh
+_cached_hook zoxide zoxide init zsh
+unfunction _cached_hook

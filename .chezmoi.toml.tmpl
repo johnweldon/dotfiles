@@ -87,9 +87,17 @@
 {{- $profile := env "DOTFILES_PROFILE" -}}
 {{- if eq $profile "" -}}{{- $profile = promptStringOnce . "profile" "Install profile (full/minimal/work)" "full" -}}{{- end -}}
 
+{{- /* Interactive shell config to deploy: "bash" (default) or "zsh". No prompt:
+       an existing value is kept, DOTFILES_SHELL overrides it, otherwise bash.
+       The bash files deploy either way (zsh reads ~/.bash_env for PATH). */ -}}
+{{- $shell := "bash" -}}
+{{- with (index . "shell") -}}{{- $shell = . -}}{{- end -}}
+{{- with (env "DOTFILES_SHELL") -}}{{- $shell = . -}}{{- end -}}
+
 [data]
 
   profile = {{ $profile | quote }}
+  shell = {{ $shell | quote }}
 
   [data.user]
     name = {{ $name | quote }}

@@ -1,0 +1,11 @@
+# ~/.zshenv - every zsh: login, interactive, and one-shot `ssh host cmd`.
+# Deployed only where chezmoi data has shell = "zsh".
+#
+# PATH and environment come from ~/.bash_env, which is POSIX sh and shared with
+# bash; it also sources ~/.local.bash_env, the machine-local overrides.
+# shellcheck disable=SC1090,SC1091
+[ -f "${HOME}/.bash_env" ] && . "${HOME}/.bash_env"
+
+# On macOS, /etc/zprofile runs path_helper after this file and moves the system
+# directories ahead of Homebrew's; ~/.zprofile restores the order built here.
+__ZSHENV_PATH=$PATH

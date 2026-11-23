@@ -1,0 +1,11 @@
+# ~/.zprofile - zsh login shells, after /etc/zprofile.
+# Deployed only where chezmoi data has shell = "zsh".
+#
+# /etc/zprofile's path_helper put /usr/bin and friends first, ahead of Homebrew
+# and ~/.local/bin. Put the order ~/.zshenv built back in front; directories
+# path_helper added that were not there yet stay, after it. -U drops repeats.
+typeset -U path
+if [[ -n ${__ZSHENV_PATH:-} ]]; then
+  path=(${(s.:.)__ZSHENV_PATH} $path)
+fi
+unset __ZSHENV_PATH

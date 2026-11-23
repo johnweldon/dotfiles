@@ -13,6 +13,12 @@ CLAUDE.md
 {{ end -}}
 {{/* work: a full environment whose package list and machine-local files come
        from a private repo, so the personal Brewfile and desktop-only pieces stay off. */ -}}
+{{/* zsh files deploy only where chezmoi data says shell = "zsh". */ -}}
+{{ if ne (index . "shell" | default "bash") "zsh" -}}
+.zshenv
+.zprofile
+.zshrc
+{{ end -}}
 {{ if and (hasKey . "profile") (eq .profile "work") -}}
 build/data/Brewfile
 .vnc

@@ -10,6 +10,8 @@ A single `profile` setting selects how much gets installed:
 
 The profile is selected at `chezmoi init` and persisted in `~/.config/chezmoi/chezmoi.toml`. It drives a templated [`.chezmoiignore`](.chezmoiignore) that excludes the full-only paths when `profile = "minimal"`. Selection order: the `DOTFILES_PROFILE` environment variable wins if set; otherwise you are prompted (default `full`).
 
+A separate `shell` setting picks the interactive shell config: `bash` (default) or `zsh`. With `shell = "zsh"`, `.zshenv`, `.zprofile` and `.zshrc` deploy alongside the bash files; `.zshenv` sources `~/.bash_env`, so PATH and environment have one source for both shells, and `.zprofile` undoes the PATH reordering of macOS `/etc/zprofile`. There is no prompt: an existing value is kept, `DOTFILES_SHELL=zsh` sets it at `chezmoi init`, otherwise it is `bash`. Machine-local interactive config goes in `~/.local.zshrc`, as `~/.local.bashrc` does for bash.
+
 ## Install
 
 ### Full (workstation, default)
