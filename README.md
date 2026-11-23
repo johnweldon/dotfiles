@@ -6,6 +6,7 @@ A single `profile` setting selects how much gets installed:
 
 - `full` (default): the complete environment -- Neovim/LazyVim, Homebrew Brewfile, VNC, all `bin/` helpers, and every config.
 - `minimal`: a lean set for transient or freshly-provisioned boxes -- shell, git, vim, ssh, and the lightweight `bin/` git helpers, with the heavy/desktop pieces excluded.
+- `work`: `full`, except that the Homebrew package list (`build/data/Brewfile`), `.vnc` and `Documents/PowerShell` are not deployed. A work machine gets its packages and machine-local files (`~/.local.*`) from a private repo; nothing employer-specific lives here.
 
 The profile is selected at `chezmoi init` and persisted in `~/.config/chezmoi/chezmoi.toml`. It drives a templated [`.chezmoiignore`](.chezmoiignore) that excludes the full-only paths when `profile = "minimal"`. Selection order: the `DOTFILES_PROFILE` environment variable wins if set; otherwise you are prompted (default `full`).
 

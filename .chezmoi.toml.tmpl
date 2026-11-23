@@ -85,7 +85,7 @@
 {{- end -}}
 
 {{- $profile := env "DOTFILES_PROFILE" -}}
-{{- if eq $profile "" -}}{{- $profile = promptStringOnce . "profile" "Install profile (full/minimal)" "full" -}}{{- end -}}
+{{- if eq $profile "" -}}{{- $profile = promptStringOnce . "profile" "Install profile (full/minimal/work)" "full" -}}{{- end -}}
 
 [data]
 

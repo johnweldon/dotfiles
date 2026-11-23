@@ -11,6 +11,13 @@ CLAUDE.md
 .config/environment.d
 .config/kitty
 {{ end -}}
+{{/* work: a full environment whose package list and machine-local files come
+       from a private repo, so the personal Brewfile and desktop-only pieces stay off. */ -}}
+{{ if and (hasKey . "profile") (eq .profile "work") -}}
+build/data/Brewfile
+.vnc
+Documents/PowerShell
+{{ end -}}
 {{ if and (hasKey . "profile") (eq .profile "minimal") -}}
 bin/brew-upgrade
 bin/pdftostdout
