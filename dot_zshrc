@@ -96,15 +96,31 @@ _start_ssh_agent() {
 [[ -f ${HOME}/.ssh/noagent ]] || _start_ssh_agent
 unfunction _start_ssh_agent
 
-# A plain prompt for now: exit status when non-zero, user@host over ssh, the
-# directory, and the git branch.
-autoload -Uz vcs_info add-zsh-hook
-zstyle ':vcs_info:*' enable git
-zstyle ':vcs_info:git:*' formats ' %F{magenta}(%b)%f'
-zstyle ':vcs_info:git:*' actionformats ' %F{magenta}(%b|%a)%f'
-add-zsh-hook precmd vcs_info
-setopt PROMPT_SUBST
-PROMPT='%(?..%F{red}[%?]%f )${SSH_CONNECTION:+%n@%m:}%F{blue}%~%f${vcs_info_msg_0_} %# '
+# Prompt: zshline (statusline's zsh mode, the bashline prompt from
+# ~/.bash_prompt) where it is installed, set from a precmd hook. zsh restores $?
+# for each hook, so the hook sees the command's status whatever runs first.
+# PROMPT then holds zshline's text, with % already escaped; PROMPT_SUBST stays
+# off so a $ or backquote in a path or branch name is never expanded.
+autoload -Uz add-zsh-hook
+if command -v zshline >/dev/null 2>&1; then
+  _zshline_precmd() {
+    local rc=$?
+    # shellcheck disable=SC2154 # jobstates is a zsh special parameter
+    PROMPT="$(zshline --exit-code=$rc --shlvl=$SHLVL --jobs=${#jobstates})"
+  }
+  add-zsh-hook precmd _zshline_precmd
+  setopt NO_PROMPT_SUBST
+else
+  # A plain prompt: exit status when non-zero, user@host over ssh, the
+  # directory, and the git branch.
+  autoload -Uz vcs_info
+  zstyle ':vcs_info:*' enable git
+  zstyle ':vcs_info:git:*' formats ' %F{magenta}(%b)%f'
+  zstyle ':vcs_info:git:*' actionformats ' %F{magenta}(%b|%a)%f'
+  add-zsh-hook precmd vcs_info
+  setopt PROMPT_SUBST
+  PROMPT='%(?..%F{red}[%?]%f )${SSH_CONNECTION:+%n@%m:}%F{blue}%~%f${vcs_info_msg_0_} %# '
+fi
 
 # Machine-local interactive config (not chezmoi-managed).
 # shellcheck disable=SC1090,SC1091
