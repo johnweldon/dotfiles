@@ -6,6 +6,13 @@
 # shellcheck disable=SC1090,SC1091
 [ -f "${HOME}/.bashrc" ] && . "${HOME}/.bashrc"
 
+# SSH logins get their own security session with the login keychain locked;
+# unlock once so gog, op, git signing etc. can read their tokens.
+if [ "$(uname -s)" = Darwin ] && [ -n "${SSH_CONNECTION:-}" ] && [ -t 0 ] &&
+  ! security show-keychain-info login.keychain-db >/dev/null 2>&1; then
+  security unlock-keychain login.keychain-db
+fi
+
 if command -v cleanpath > /dev/null 2>&1 ; then
   PATH=$(cleanpath -separator ':' "${PATH}")
   export PATH
