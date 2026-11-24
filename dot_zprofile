@@ -9,3 +9,10 @@ if [[ -n ${__ZSHENV_PATH:-} ]]; then
   path=(${(s.:.)__ZSHENV_PATH} $path)
 fi
 unset __ZSHENV_PATH
+
+# SSH logins get their own security session with the login keychain locked;
+# unlock once so gog, op, git signing etc. can read their tokens.
+if [[ $OSTYPE == darwin* && -n ${SSH_CONNECTION:-} && -o interactive && -t 0 ]] &&
+  ! security show-keychain-info login.keychain-db >/dev/null 2>&1; then
+  security unlock-keychain login.keychain-db
+fi
