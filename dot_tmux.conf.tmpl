@@ -1,0 +1,40 @@
+set -g default-terminal "tmux-256color"
+
+setw -g automatic-rename on
+set-option -g automatic-rename-format '#{=/15/...:#{b:pane_current_path}}'
+set -g renumber-windows on
+set -g status-interval 5
+
+set -g monitor-activity off
+set -g visual-activity off
+set -g monitor-bell on
+set -g visual-bell on
+bind a next-window -a
+
+set -g mouse on
+set -g focus-events on
+
+set -g status-style bg=default,fg=default
+set -as terminal-features ",*:RGB"
+
+set -s escape-time 10
+set -sg repeat-time 600
+set -g history-limit 5000
+{{- if eq .chezmoi.os "darwin" }}
+
+# reattach-to-user-namespace has been unnecessary since macOS 10.10; pbcopy and
+# pbpaste reach the clipboard from a plain tmux pane. Keep -l: .bash_profile is
+# where cleanpath dedupes PATH, and the login chain costs nothing measurable.
+set -g default-command "/opt/homebrew/bin/bash -l"
+
+# Recognize the Ctrl-b prefix when a TUI leaves iTerm2 in CSI-u/extended-keys mode
+set -s extended-keys on
+set -as terminal-features 'xterm*:extkeys'
+
+# Copies land on this Mac's pasteboard even when the client is ssh from another host
+set -s copy-command pbcopy
+# Don't also OSC 52 to the ssh client's terminal; Synergy pushes that stale copy back over pbcopy
+set -s set-clipboard off
+{{- end }}
+
+if '[ -f ~/.local.tmux.conf ]' 'source ~/.local.tmux.conf'
